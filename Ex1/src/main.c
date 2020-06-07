@@ -26,12 +26,17 @@ int16_t power(int16_t a, int16_t exp) {
 int main(void)
  {
     int8_t a;
-     uart_init( 9600 ); // Initialize USB serial at 9600 baud
+    uart_init( 9600 ); // Initialize USB serial at 9600 baud
+    clearTermninal();
 
-     fgcolor(11);
-     bgcolor(4);
-     printf("\n\n x x^2 x^3 x^4\n");
-     for (a = 0; a < 10; a++)
+    fgcolor(11);
+    bgcolor(4);
+    printf("\n\n x x^2 x^3 x^4\n");
+    for (a = 0; a < 10; a++)
         printf("%8d%8d%8d%8d\n",a, power(a, 2), power(a, 3), power(a, 4));
-     while(1){}
+
+
+    clreol();
+
+    while(1){}
 }

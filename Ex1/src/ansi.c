@@ -21,6 +21,17 @@ void fgcolor(uint8_t foreground) {
   printf("%c[%d;%dm", ESC, type, foreground+30);
 }
 
+void clearTermninal(){
+
+    printf("%c[2J", ESC);
+}
+
+void clreol(){
+
+    printf("%c[K", ESC);
+}
+
+
 void bgcolor(uint8_t background) {
 /* IMPORTANT:   When you first use this function you cannot get back to true white background in HyperTerminal.
    Why is that? Because ANSI does not support true white background (ANSI white is gray to most human eyes).
