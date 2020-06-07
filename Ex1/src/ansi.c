@@ -31,6 +31,41 @@ void clreol(){
     printf("%c[K", ESC);
 }
 
+void gotoxy(uint8_t x_1, uint8_t y_1) {
+    int x = y_1;
+    int y = x_1;
+
+    printf("%c[%d;%dH", ESC, x, y);
+}
+
+void homeCurser(){
+    printf("%c[H", ESC);
+}
+
+void underline (uint8_t on) {
+    if (on == 0) {
+        printf("%c[%dm", ESC, 24);
+    } else {
+        printf("%c[%dm", ESC, 4);
+    }
+}
+
+void blink(uint8_t on) {
+    if (on == 0) {
+        printf("%c[%dm", ESC, 25);
+    } else {
+        printf("%c[%dm", ESC, 5);
+    }
+}
+
+void inverse(uint8_t on) {
+     if (on == 0) {
+        printf("%c[%dm", ESC, 27);
+    } else {
+        printf("%c[%dm", ESC, 7);
+    }
+}
+
 
 void bgcolor(uint8_t background) {
 /* IMPORTANT:   When you first use this function you cannot get back to true white background in HyperTerminal.
@@ -68,3 +103,85 @@ void resetbgcolor() {
 // gray on black text, no underline, no blink, no reverse
   printf("%c[m", ESC);
 }
+
+void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char title[]) {
+    int x1 = y_1;
+    int y1 = x_1;
+    int x2 = y_2;
+    int y2 = x_2;
+
+    gotoxy(x1,y1);
+    //char a = 'A';
+    if (style == 'A') {
+        printf("%c%c", 218,180);
+        inverse(1);
+        //charcount
+        int charCount = 0;
+        while (title[charCount] != '\0') {
+            charCount++;
+        }
+        int i;
+        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
+            printf(" ");
+        }
+        printf("%s", title);
+        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
+            printf(" ");
+        }
+        inverse(0);
+        printf("%c%c\n", 195,191);
+        //Lodrette linjer
+        for(i = 0; i < (y2-y1-2); i++){
+            printf("%c", 179);
+            int j;
+            for (j = 0; j < (x2-x1)-2; j++) {
+                printf(" ");
+            }
+            printf("%c\n", 179);
+        }
+        //Bundlinje
+        printf("%c",192);
+        for (i = 0; i < (x2-x1)-2; i++) {
+          printf("%c", 196);
+        }
+        printf("%c\n",217); }
+
+        else if (style == 'B') {
+
+        printf("%c%c", 201,185);
+        inverse(1);
+        //charcount
+        int charCount = 0;
+        while (title[charCount] != '\0') {
+            charCount++;
+        }
+        int i;
+        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
+            printf(" ");
+        }
+        printf("%s", title);
+        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
+            printf(" ");
+        }
+        inverse(0);
+        printf("%c%c\n", 204,187);
+        //Lodrette linjer
+        for(i = 0; i < (y2-y1-2); i++){
+            printf("%c", 186);
+            int j;
+            for (j = 0; j < (x2-x1)-2; j++) {
+                printf(" ");
+            }
+            printf("%c\n", 186);
+        }
+        //Bundlinje
+        printf("%c",200);
+        for (i = 0; i < (x2-x1)-2; i++) {
+          printf("%c", 205);
+        }
+        printf("%c\n",188); }
+    }
+
+
+
+
