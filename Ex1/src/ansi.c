@@ -104,83 +104,71 @@ void resetbgcolor() {
   printf("%c[m", ESC);
 }
 
+struct borderStyle{
+    uint16_t leftTopCorner, leftWall, rightWall,
+    rightTopcorner, vertical, leftBottomCorner,
+    horizontal, rigtBottomCorner;
+} default_borderStyle = {218,180,195,191,179,192,196,217};
+
 void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char title[]) {
     int x1 = y_1;
     int y1 = x_1;
     int x2 = y_2;
     int y2 = x_2;
 
+    struct borderStyle myStyle;
+
+
     gotoxy(x1,y1);
     //char a = 'A';
     if (style == 'A') {
-        printf("%c%c", 218,180);
-        inverse(1);
-        //charcount
-        int charCount = 0;
-        while (title[charCount] != '\0') {
-            charCount++;
-        }
-        int i;
-        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
-            printf(" ");
-        }
-        printf("%s", title);
-        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
-            printf(" ");
-        }
-        inverse(0);
-        printf("%c%c\n", 195,191);
-        //Lodrette linjer
-        for(i = 0; i < (y2-y1-2); i++){
-            printf("%c", 179);
-            int j;
-            for (j = 0; j < (x2-x1)-2; j++) {
-                printf(" ");
-            }
-            printf("%c\n", 179);
-        }
-        //Bundlinje
-        printf("%c",192);
-        for (i = 0; i < (x2-x1)-2; i++) {
-          printf("%c", 196);
-        }
-        printf("%c\n",217); }
-
-        else if (style == 'B') {
-
-        printf("%c%c", 201,185);
-        inverse(1);
-        //charcount
-        int charCount = 0;
-        while (title[charCount] != '\0') {
-            charCount++;
-        }
-        int i;
-        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
-            printf(" ");
-        }
-        printf("%s", title);
-        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
-            printf(" ");
-        }
-        inverse(0);
-        printf("%c%c\n", 204,187);
-        //Lodrette linjer
-        for(i = 0; i < (y2-y1-2); i++){
-            printf("%c", 186);
-            int j;
-            for (j = 0; j < (x2-x1)-2; j++) {
-                printf(" ");
-            }
-            printf("%c\n", 186);
-        }
-        //Bundlinje
-        printf("%c",200);
-        for (i = 0; i < (x2-x1)-2; i++) {
-          printf("%c", 205);
-        }
-        printf("%c\n",188); }
+        myStyle = default_borderStyle;
     }
+    else if (style == 'B') {
+        myStyle.leftTopCorner = 201;
+        myStyle.leftWall = 185;
+        myStyle.rightWall = 204;
+        myStyle.rightTopcorner = 187;
+        myStyle.vertical = 186;
+        myStyle.leftBottomCorner = 200;
+        myStyle.horizontal = 205;
+        myStyle.rigtBottomCorner = 188;
+
+    }
+
+    printf("%c%c", myStyle.leftTopCorner, myStyle.leftWall);
+        inverse(1);
+        //charcount
+        int charCount = 0;
+        while (title[charCount] != '\0') {
+            charCount++;
+        }
+        int i;
+        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
+            printf(" ");
+        }
+        printf("%s", title);
+        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
+            printf(" ");
+        }
+        inverse(0);
+        printf("%c%c\n", myStyle.rightWall,myStyle.rightTopcorner);
+        //Lodrette linjer
+        for(i = 0; i < (y2-y1-2); i++){
+            printf("%c", myStyle.vertical);
+            int j;
+            for (j = 0; j < (x2-x1)-2; j++) {
+                printf(" ");
+            }
+            printf("%c\n", myStyle.vertical);
+        }
+        //Bundlinje
+        printf("%c",myStyle.leftBottomCorner);
+        for (i = 0; i < (x2-x1)-2; i++) {
+          printf("%c", myStyle.horizontal);
+        }
+        printf("%c\n",myStyle.rigtBottomCorner);
+}
 
 
 
