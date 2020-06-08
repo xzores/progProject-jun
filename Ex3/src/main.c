@@ -79,15 +79,15 @@ int32_t multiply(int32_t a, int32_t b){
     int32_t inters = b & 0xFFFF0000;
 
     res = a * (inters >> 16);
-    res += ((a << 10) * (deci << 10)) >> 10;
+    res += (a * (deci)) >> 16;
 
     return res;
 }
 
 void rotateVector(struct vector_t* v, int16_t angle) {
     struct vector_t v_temp = {v->x, v->y};
-    v->x = multiply(v_temp.x, mycos(angle)) + multiply(v_temp.y, mysin(angle));
-    v->y = multiply(v_temp.x, mysin(angle)) + multiply(v_temp.y, mycos(angle));
+    v->x = multiply(v_temp.x, expand(mycos(angle))) + multiply(v_temp.y, expand(mysin(angle)));
+    v->y = multiply(v_temp.x, expand(mysin(angle))) + multiply(v_temp.y, expand(mycos(angle)));
 }
 
 int main(void)
@@ -109,8 +109,10 @@ int main(void)
 
     printf("\n");
 
+    multiply(32, 8192);
+
     struct vector_t v = {1,2};
-    rotateVector(&v, 256);
+    rotateVector(&v, 12);
 
     //rotateVector((6,4), -10°) (6.5955, 2.9154)
     //rotateVector((-4,-4), 900°) (4.0000, 4.0000)
