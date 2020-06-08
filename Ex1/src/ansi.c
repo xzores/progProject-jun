@@ -119,7 +119,7 @@ void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char 
     struct borderStyle myStyle;
 
 
-    gotoxy(x1,y1);
+    gotoxy(0,y1);
     //char a = 'A';
     if (style == 'A') {
         myStyle = default_borderStyle;
@@ -136,25 +136,47 @@ void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char 
 
     }
 
-    printf("%c%c", myStyle.leftTopCorner, myStyle.leftWall);
-        inverse(1);
         //charcount
         int charCount = 0;
         while (title[charCount] != '\0') {
             charCount++;
         }
+
         int i;
-        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
-            printf(" ");
+        int k;
+
+        if(charCount != 0)
+        {
+            inverse(1);
+            printf("%c%c", myStyle.leftTopCorner, myStyle.leftWall);
+            for (i = 0; i < x1; i++) {
+                printf(" ");
+            }
+            printf("%s", title);
+            for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
+                printf(" ");
+            }
+
+            inverse(0);
+            printf("%c%c\n", myStyle.rightWall,myStyle.rightTopcorner);
         }
-        printf("%s", title);
-        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
-            printf(" ");
+        else{
+            for (i = 0; i < x1; i++) {
+                printf(" ");
+            }
+
+            printf("%c", myStyle.leftTopCorner);
+            for (i = 0; i < (x2-x1)-2; i++) {
+                printf("%c", myStyle.horizontal);
+            }
+            printf("%c\n", myStyle.rightTopcorner);
         }
-        inverse(0);
-        printf("%c%c\n", myStyle.rightWall,myStyle.rightTopcorner);
+
         //Lodrette linjer
         for(i = 0; i < (y2-y1-2); i++){
+            for (k = 0; k < x1; k++) {
+                printf(" ");
+            }
             printf("%c", myStyle.vertical);
             int j;
             for (j = 0; j < (x2-x1)-2; j++) {
@@ -162,7 +184,12 @@ void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char 
             }
             printf("%c\n", myStyle.vertical);
         }
+
+
         //Bundlinje
+        for (k = 0; k < x1; k++) {
+                printf(" ");
+            }
         printf("%c",myStyle.leftBottomCorner);
         for (i = 0; i < (x2-x1)-2; i++) {
           printf("%c", myStyle.horizontal);
