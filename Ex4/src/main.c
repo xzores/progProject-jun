@@ -23,6 +23,7 @@ int main(void)
     inverse(0);
 
     window(10,10,25,50,'B',"");
+    window(0,0,10,10,'A',"");
 
   while(1)
   {
