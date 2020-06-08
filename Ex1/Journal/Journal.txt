@@ -1,0 +1,28 @@
+Journal Ex1:----------------------------------------------
+Vi har fundet os til rette med EmBitz, Putty og vores microcontroller. Der er etableret forbindelse imellem de forskellige enheder, og vi kan skrive til og aflæse outputtet fra microcontrolleren.
+Vi har brugt tid på at lære forskellige debugging metoder at kende. En del af exercise 1 har også været at arbejde med integer representations, Unsigned, Signed-magnitude, One's Compliment osv.
+
+Journal Ex2:----------------------------------------------
+Vi har brugt tid på at lære ANSI Escape-koder at kende. Disse er værktøjer til at modificere terminalens udseende, og vi regner med at det skal bruges til at lave grafik senere hen.
+Derudover har vi også kigget på, hvordan man udnytter CP850-typeset'et, til at printe figurer i terminalen. Følgende funktioner er blevet lavet:
+
+- clrscr(); Denne rydder skærmen for karakterer.
+  Vi har udnyttet Escape-koden [2J.
+
+- clreol(); Rydder resten af linjen, derfra hvor curseren er i terminalen.
+  Udføres med Escape-koden [K.
+
+- gotoxy(); Flytter curseren til en bestemt celle i terminalen. Funktionen tager to argumenter, ét koordinatsæt, som gives i ( x , -y ), dvs. oppefra og ned. Vi udnytter Escape-koden [x;y .
+
+- underline(); Skriver characters understreget.´Der er indsat et if-statement, som tager et argument, on, som hvis 0 slukker for underline, hvis 1 tænder for det. Gøres med Escape-koden [5m (on) eller [24m (off).
+
+- blink() og inverse(); På samme måde laves blink(), som får tekst og characters til at blinke, samt inverse(), som bytter om på farverne mellem tekst- og baggrundsfarve. Udføres som underline() med if statements og de rigtige ESC-kommando-cifre.
+
+-homeCurser(); Vi lavede en funktion som returnere curseren til den første, øverste celle.
+
+Window();-----------------------------------
+Window er en funktion, som printer et lukket, firkantet vindue i terminalen. Vinduet er tegnet af characters fra CP850. Vinduet tager to koordinatsæt, som er de hjørner hvor vinduet starter og slutter. Programmet tager derudover også en string som argument, som vises som titel øverst i vinduet.
+
+Der er lavet to styles af vinduer, som ændrer hvordan vinduet grafisk ser ud; et er enkelt-optrukket rundt om, et andet er dobbeltoptrukket. Dette klares med en struct, som indeholder integers, hvis værdier oversættes til en character. Alle disse characters er de, der er nødvendige for at tegne vores vindue. Alt efter hvilken style der givet som arguent til window(), vælges et sæt characters eller det andet.
+
+Vinduet bygges da op med en række for-loops, hvor der printes characters. Derudover tæller vi også hvor mange characters der er givet til titlen, og centerer derefter titlen, ved at sammenligne dens længde med vinduets totale længde, baseret på de givne koordinatsæt.
