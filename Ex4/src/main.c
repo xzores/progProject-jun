@@ -22,8 +22,8 @@ int main(void)
     clearTermninal();
     inverse(0);
 
-    window(10,10,25,50,'B',"");
-    window(0,0,10,10,'A',"");
+    window(0,0,30,50,'B',"");
+    window(10,20,2,10,'A',"");
 
   while(1)
   {
