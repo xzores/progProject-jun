@@ -21,6 +21,7 @@ void fgcolor(uint8_t foreground) {
   printf("%c[%d;%dm", ESC, type, foreground+30);
 }
 
+
 void clearTermninal(){
 
     printf("%c[2J", ESC);
@@ -70,6 +71,17 @@ void moveForward(uint8_t i) {
     printf("%c[1%dm", ESC, i, 'C');
 }
 
+void showCursor(uint8_t show) {
+
+  if (show) {
+    printf("%c[?25h", ESC);
+  }
+  else {
+    printf("%c[?25l", ESC);
+  }
+
+}
+
 void bgcolor(uint8_t background) {
 /* IMPORTANT:   When you first use this function you cannot get back to true white background in HyperTerminal.
    Why is that? Because ANSI does not support true white background (ANSI white is gray to most human eyes).
@@ -114,12 +126,14 @@ struct borderStyle{
 } default_borderStyle = {218,180,195,191,179,192,196,217};
 
 void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char title[]) {
-    int x1 = y_1;
-    int y1 = x_1;
+    int x1 = y_1 + 1;
+    int y1 = x_1 + 1;
     int x2 = y_2;
     int y2 = x_2;
 
     struct borderStyle myStyle;
+
+    int i = 0;
 
     uint8_t ypos = y1;
     uint8_t xpos = x1;
@@ -149,18 +163,122 @@ void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char 
 
     if(charCount != 0)
     {
+        gotoxy(xpos,ypos);
+        printf("%c%c", myStyle.leftTopCorner, myStyle.leftWall);
         inverse(1);
+        for (i = 0; i < (((x2)-2) - charCount)/2; i++) {
+            printf(" ");
+        }
+        printf(title);
+        for (i = 0; i < (((x2)-2) - charCount)/2 - 1; i++) {
+            printf(" ");
+        }
 
         inverse(0);
+        printf("%c%c", myStyle.rightWall, myStyle.rightTopcorner);
     }
     else
     {
-
+        //top
+        gotoxy(xpos,ypos);
+        printf("%c", myStyle.leftTopCorner);
+        for (i = 0; i < (x2)-2; i++) {
+            printf("%c", myStyle.horizontal);
+        }
+        printf("%c", myStyle.rightTopcorner);
     }
+
+    ypos = y1 + 1;
+    xpos = x1;
+    //Lodrette linjer venstre
+    for(i = 0; i < (y2-1); i++){
+        gotoxy(xpos,ypos);
+        printf("%c", myStyle.vertical);
+        ypos++;
+    }
+
+    ypos = y1 + 1;
+    xpos = x1 + x2 - 1;
+    //Lodrette linjer right
+    for(i = 0; i < (y2-1); i++){
+        gotoxy(xpos,ypos);
+        printf("%c", myStyle.vertical);
+        ypos++;
+    }
+
+    ypos = y1 + y2;
+    xpos = x1;
+    //bottom
+    gotoxy(xpos,ypos);
+    printf("%c", myStyle.leftBottomCorner);
+    for (i = 0; i < x2 - 2; i++) {
+        printf("%c", myStyle.horizontal);
+    }
+    printf("%c", myStyle.rigtBottomCorner);
+
 
 
 }
 
+/*
+        //charcount
+        int charCount = 0;
+        while (title[charCount] != '\0') {
+            charCount++;
+        }
+
+        int i;
+        int k;
+
+        if(charCount != 0)
+        {
+            inverse(1);
+            printf("%c%c", myStyle.leftTopCorner, myStyle.leftWall);
+            for (i = 0; i < x1; i++) {
+                printf(" ");
+            }
+            printf("%s", title);
+            for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
+                printf(" ");
+            }
+
+            inverse(0);
+            printf("%c%c\n", myStyle.rightWall,myStyle.rightTopcorner);
+        }
+        else{
+            for (i = 0; i < x1; i++) {
+                printf(" ");
+            }
+
+            printf("%c", myStyle.leftTopCorner);
+            for (i = 0; i < (x2-x1)-2; i++) {
+                printf("%c", myStyle.horizontal);
+            }
+            printf("%c\n", myStyle.rightTopcorner);
+        }
+
+        //Lodrette linjer
+        for(i = 0; i < (y2-y1-2); i++){
+            for (k = 0; k < x1; k++) {
+                printf(" ");
+            }
+            printf("%c", myStyle.vertical);
+            int j;
+            for (j = 0; j < (x2-x1)-2; j++) {
+                printf(" ");
+            }
+            printf("%c\n", myStyle.vertical);
+        }
 
 
+        //Bundlinje
+        for (k = 0; k < x1; k++) {
+                printf(" ");
+            }
+        printf("%c",myStyle.leftBottomCorner);
+        for (i = 0; i < (x2-x1)-2; i++) {
+          printf("%c", myStyle.horizontal);
+        }
+        printf("%c\n",myStyle.rigtBottomCorner);
+*/
 

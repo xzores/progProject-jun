@@ -156,9 +156,20 @@ void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char 
     else
     {
         //top
-
+        printf("%c", myStyle.leftTopCorner);
+        for (i = 0; i < (x2-x1)-2; i++) {
+            printf("%c", myStyle.horizontal);
+        }
+        printf("%c", myStyle.rightTopcorner);
+        ypos++;
     }
 
+    //Lodrette linjer
+    for(i = 0; i < (y2-y1-2); i++){
+        gotoxy(ypos,xpos);
+        printf("%c", myStyle.vertical);
+        ypos++;
+    }
 
 }
 

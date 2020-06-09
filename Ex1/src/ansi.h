@@ -15,5 +15,6 @@ void homeCurser();
 void underline (uint8_t on);
 void blink(uint8_t on);
 void inverse(uint8_t on);
-setCharColor(uint8_t color);
+void setCharColor(uint8_t color);
+void showCursor(uint8_t show);
 #endif /* ANSI_H */

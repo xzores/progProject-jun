@@ -45,7 +45,7 @@ int main(void)
     */
 
     //Tegne vinduer----------------------------------------------
-    window(0,0,10,10,'A',"Window");
+    window(2,2,10,10,'A',"Window");
     window(12,0,22,20,'B',"Window");
     //gotoxy(10,10);
 
