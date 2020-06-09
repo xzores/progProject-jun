@@ -46,29 +46,30 @@ void setPortPuPd(GPIO_TypeDef * GPIO, char pin, uint8_t pupd) {//PullUp PullDown
     GPIO->PUPDR |= ((pupd) << (pin * 2));
 }
 
-uint8_t readPortPin(GPIO_TypeDef * GPIO, char pin) {//PullUp PullDown
+uint8_t readPortPin(GPIO_TypeDef * GPIO, char pin) {
 
-    uint8_t val = GPIO->IDR & (0x0001 << pin); //Read from pin PA0
-    return val != 0;
+    uint8_t val = GPIO->IDR & (0x0001 << pin); //pin<pin> AND'es med 1, alle andre AND'es med 0.
+    return val != 0; //returner boolean true eller false (1/0).
 }
 
-void setPin(GPIO_TypeDef * GPIO, char pin, uint8_t val) {//PullUp PullDown
+void setPin(GPIO_TypeDef * GPIO, char pin, uint8_t val) {
 
-    GPIO->ODR &= ~(0x0001 << pin); //Read from pin PA0
-    GPIO->ODR |= ((val != 0) << pin);
+    GPIO->ODR &= ~(0x0001 << pin); //pin<pin> cleares til 0
+    GPIO->ODR |= ((val != 0) << pin); //pin<pin> sættes til val
 }
 
 void setLED(uint8_t color){
 
-    color = ~color;
+    color = ~color; //LEDerne aktiveres ved at give dem ground, da de på den modsatte side er fordundet til VDD. VDD->LED->GND
 
-    setPortMode(BLUE_LED, OUT_MODE);
+    setPortMode(BLUE_LED, OUT_MODE); //BLUE_LED = GPIOA, 9! Denne pin sættes som output. Kunne dette gøres i initialiseringen i stedet?? Anders
     setPortMode(GREEN_LED, OUT_MODE);
     setPortMode(RED_LED, OUT_MODE);
 
-    setPin(BLUE_LED, (color & 1));
-    setPin(GREEN_LED, (color >> 1) & 1);
-    setPin(RED_LED, (color >> 2) & 1);
+    setPin(BLUE_LED, (color & 1)); //Blue aktiveres når joystick er Up
+    setPin(GREEN_LED, (color >> 1) & 1); //Joystick er Down
+    setPin(RED_LED, (color >> 2) & 1); //Joystick er Left
+    //Kunne man aktivere to farver på én gang til de resterende retninger ?? Anders
 }
 
 uint8_t readJoystick(){
@@ -79,20 +80,20 @@ uint8_t readJoystick(){
     val |= (readPortPin(LEFT_JOY_STICK) << 2);
     val |= (readPortPin(RIGHT_JOY_STICK) << 3);
     val |= (readPortPin(CENTER_JOY_STICK) << 4);
-
+    // val = 000xxxxx, hvor et x bliver til 1 når joystick er aktiveret i den retning, og ellers 0.
     return val;
 }
 
 int main(void) {
     uart_init( 9600 );
 
-    RCC->AHBENR |= RCC_AHBPeriph_GPIOA;
+    RCC->AHBENR |= RCC_AHBPeriph_GPIOA; //Enabling clock for IO Port A
     RCC->AHBENR |= RCC_AHBPeriph_GPIOB;
     RCC->AHBENR |= RCC_AHBPeriph_GPIOC;
     RCC->AHBENR |= RCC_AHBPeriph_GPIOD;
 
-    setPortMode(RIGHT_JOY_STICK, IN_MODE);
-    setPortPuPd(RIGHT_JOY_STICK, NO_PULL);
+    setPortMode(RIGHT_JOY_STICK, IN_MODE); //Porten RJS er forbundet til sættes til input-mode.
+    setPortPuPd(RIGHT_JOY_STICK, NO_PULL); //Porten er forbundet til 1/0 i hardware, det er ikke nødvendigt med pull ?? Anders
 
     setPortMode(UP_JOY_STICK, IN_MODE);
     setPortPuPd(UP_JOY_STICK, NO_PULL);
