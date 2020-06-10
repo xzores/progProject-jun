@@ -15,44 +15,52 @@
 #include "30010_io.h"
 #include "Utility.h"
 
-int32_t second(TIM_TypeDef * timer, int16_t sec) { //Ikke helt på plads
-    if (timer->CNT >= timer->ARR) {
-       sec++;
-    }
-    return sec;
-}
+struct time{
+uint8_t h;
+uint8_t s;
+uint8_t m;
+uint8_t H;
+} time;
 
-static uint8_t hundreths = 0;
-static uint8_t seconds = 0;
-static uint8_t minutes = 0;
-static uint8_t hours = 0;
+struct time timer;
+
 static uint8_t printSec = 0;
 
+
 void TIM2_IRQHandler(void) {
-    hundreths++;
-    if (hundreths >= 100) {
-        hundreths = 0;
-        seconds++;
+    timer.h++;
+    if (timer.h >= 100) {
+        timer.h = 0;
+        timer.s++;
         printSec = 1;
     }
 
-    if (seconds >= 60) {
-        seconds = 0;
-        minutes++;
+    if (timer.s >= 60) {
+        timer.s = 0;
+        timer.m++;
     }
 
-    if (minutes >= 60) {
-        minutes = 0;
-        hours++;
+    if (timer.m >= 60) {
+        timer.m = 0;
+        timer.H++;
     }
 
     TIM2->SR &= ~0x0001; //Clear interrupt bit
 }
 
 
+
+void resetTimer(struct time timer) {
+    timer.h = 0;
+    timer.s = 0;
+    timer.m = 0;
+    timer.H = 0;
+}
+
+
 int main(void) {
     uart_init(9600);
-
+    clearTermninal();
     //Joystick pins---------------------
     RCC->AHBENR |= RCC_AHBPeriph_GPIOA; //Enabling clock for IO Port A
     RCC->AHBENR |= RCC_AHBPeriph_GPIOB;
@@ -74,9 +82,8 @@ int main(void) {
     setPortMode(DOWN_JOY_STICK, IN_MODE);
     setPortPuPd(DOWN_JOY_STICK, NO_PULL);
 
+    printf("%d.%d.%d.%d", timer.H, timer.m, timer.s, timer.h);//0.0.0.0
 
-    printf("\n\n"); //space i terminalen
-    printf("%d.%d.%d.%d\n", hours, minutes, seconds, hundreths);//0.0.0.0
 
     //Opsætning af timer---------------------------
     RCC->APB1ENR |= RCC_APB1Periph_TIM2; //Enable Clockline to timer 2.
@@ -88,35 +95,17 @@ int main(void) {
     NVIC_SetPriority(TIM2_IRQn, 0x0); //Set Interrupt Priority
     NVIC_EnableIRQ(TIM2_IRQn); //Enable interrupt
 
-    /* Udregninger:
-    Periodetid = (1+ARR)*(1+PSC) / ClockFreq = 10ms, 1/100sekund
-    */
     uint8_t joy = 0; //Joystick edge-detection
-    uint8_t split1Enable = 0; //Vis split1
-    uint8_t split1h = 0;
-    uint8_t split1s = 0;
-    uint8_t split1m = 0;
-    uint8_t split1H = 0;
 
-    uint8_t split2Enable = 0; //Vis split2
-    uint8_t split2h = 0;
-    uint8_t split2s = 0;
-    uint8_t split2m = 0;
-    uint8_t split2H = 0;
+    resetTimer(timer);
 
   while(1)
   {
+    gotoxy(0,0);
     if(printSec) {
         printSec = 0;
-        printf("%d.%d.%d.--\n", hours, minutes, seconds);
-
-        if (split1Enable) {
-          printf("%d.%d.%d.%d\n", split1h , split1m, split1s, split1h);
-        }
-
-        if (split2Enable) {
-          printf("%d.%d.%d.%d\n", split2h , split2m, split2s, split2h);
-        }
+        printf("%d.%d.%d.--", timer.H, timer.m, timer.s);
+        gotoxy(0,0);
     }
 
 
@@ -125,36 +114,32 @@ int main(void) {
         if (joy == 0x10) {
             TIM2->CR1 = !TIM2->CR1;
             }
-        else if (joy == 0x07) {// joy left: Split 1
-            split1Enable = 1;
-            split1h = hundreths;
-            split1s = seconds;
-            split1m = minutes;
-            split1H = hours;
+        else if (joy == 0x04) {// joy left: Split 1
+            gotoxy(0,2);
+            printf("%d.%d.%d.%d", timer.H, timer.m, timer.s,timer.h);
+            homeCurser();
         }
 
         else if (joy == 0x08) {//joy right: Split 2, kun hvis split 1 allerede eksisterer
-            if (split1Enable) {
-            split2Enable = 1;
-            split2h = hundreths;
-            split2s = seconds;
-            split2m = minutes;
-            split2H = hours;
-            }
+            gotoxy(0,3);
+            printf("%d.%d.%d.%d", timer.H, timer.m, timer.s,timer.h);
+            homeCurser();
         }
 
-        else if (joy == 0x03) { //Joy-Down: stop og reset
+        else if (joy == 0x02) { //Joy-Down: stop og reset
             TIM2->CR1 = 0x00; //Sluk timer
             TIM2->CNT = 0x00; //reset counter til 0.
-            hundreths = 0; // reset values.
-            seconds = 0;
-            minutes = 0;
-            hours = 0;
+            resetTimer(timer);
+
+            gotoxy(0,2);
+            printf("%d.%d.%d.%d", timer.H, timer.m, timer.s,timer.h);
+
+            gotoxy(0,3);
+            printf("%d.%d.%d.%d", timer.H, timer.m, timer.s,timer.h);
+
             }
 
         }
-
-        homeCurser();
     }
 
 }
