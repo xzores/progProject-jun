@@ -189,7 +189,7 @@
 	"stm32f30x_wwdg.h"
 	"stm32f30x_rcc.h"
 
-1591547866 source:c:\users\bruger\documents\github\progproject-jun\ex1\src\main.c
+1591780951 source:c:\users\bruger\documents\github\progproject-jun\ex1\src\main.c
 	"stm32f30x_conf.h"
 	"30010_io.h"
 	"ansi.h"
@@ -206,10 +206,10 @@
 	"stm32f30x_conf.h"
 	<stdio.h>
 
-1591609760 source:c:\users\bruger\documents\github\progproject-jun\ex1\src\ansi.c
+1591780951 source:c:\users\bruger\documents\github\progproject-jun\ex1\src\ansi.c
 	"ansi.h"
 
-1591547866 c:\users\bruger\documents\github\progproject-jun\ex1\src\ansi.h
+1591780951 c:\users\bruger\documents\github\progproject-jun\ex1\src\ansi.h
 	<stdint.h>
 	<stdio.h>
 
