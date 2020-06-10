@@ -14,15 +14,8 @@
 #include "stm32f30x_conf.h" // STM32 config
 #include "30010_io.h" // Input/output library for this course
 #include "ansi.h"
+#include "Utility.h"
 
-
-int16_t power(int16_t a, int16_t exp) {
-// calculates a^exp
-    int16_t i, r = 1;
-    for (i = 1; i <= exp; i++)
-        r *= a;
-        return(r);
-}
 int main(void)
  {
     int8_t a;

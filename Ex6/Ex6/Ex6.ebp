@@ -83,10 +83,29 @@
 			<Add option="-eb_start_files" />
 			<Add option="-eb_lib=n" />
 		</Linker>
-		<Unit filename="..\..\Ex1\src\30010_io.c">
+		<Unit filename="..\..\Common\30010_io.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\..\Ex1\src\30010_io.h" />
+		<Unit filename="..\..\Common\30010_io.h" />
+		<Unit filename="..\..\Common\ansi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\Common\ansi.h" />
+		<Unit filename="..\..\Common\GUI.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\Common\LUT.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\Common\LUT.h" />
+		<Unit filename="..\..\Common\Utility.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\Common\Utility.h" />
+		<Unit filename="..\..\Common\vector.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\Common\vector.h" />
 		<Unit filename="cmsis\arm_common_tables.h" />
 		<Unit filename="cmsis\arm_math.h" />
 		<Unit filename="cmsis\core_cm4.h" />
