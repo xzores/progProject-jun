@@ -186,6 +186,14 @@ void lcd_push_buffer(uint8_t* buffer)
     }
 }
 
+void lcd_graphics_buffer()
+{
+
+
+
+
+}
+
 void lcd_reset()
 {
     GPIOA->ODR &= ~(0x0001 << 8); // A0 = 0 - Reset Command/Data
