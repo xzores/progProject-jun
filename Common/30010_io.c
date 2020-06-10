@@ -1,4 +1,5 @@
 #include "30010_io.h"
+#include "charset.h"
 
 /****************************/
 /*** USB Serial Functions ***/
@@ -186,13 +187,54 @@ void lcd_push_buffer(uint8_t* buffer)
     }
 }
 
+void setCharHelper(uint8_t* buf, uint8_t charIndex, uint16_t position){
+
+    char* c = &character_data[charIndex][0];
+    memcpy((&buf[position]), c, 5 * sizeof(char)); // Sets first element to some char
+}
+
+#define DISP_LENGTH 128
+
+void setChar(uint8_t* buf, char c, uint8_t x, uint8_t y){
+
+    uint16_t p = x * 5 + DISP_LENGTH * y;
+    uint8_t index = (uint8_t) c - 32;
+    setCharHelper(buf, index, p);
+
+
+//single ton (not global)
+uint8_t* getBuffer(){
+
+    static uint8_t buffer[512];
+    return buffer;
+}
+
 void lcd_graphics_buffer()
 {
+    uint8_t* buf = getBuffer();
 
+    memset(&buf,0xAA,512); // Sets each element of the buffer to 0xAA
+    setChar(buf, 'A', 0,0);
+    setChar(buf, ' ', 1,1);
+    setChar(buf, '!', 5,2);
+    setChar(buf, '!', 11,3);
 
-
-
+    lcd_push_buffer(buf);
 }
+
+void lcd_write_string(const char* toPrint, uint8_t x, uint8_t y)
+{
+    uint8_t* buf = getBuffer();
+
+    int i = 0;
+    while(toPrint[i] != '\0'){
+        setChar(buf, toPrint[i], x + i, y);
+        i++;
+    }
+
+    lcd_push_buffer(buf);
+}
+
 
 void lcd_reset()
 {

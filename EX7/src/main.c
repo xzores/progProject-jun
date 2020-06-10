@@ -17,13 +17,11 @@
 
 int main(void)
 {
-   void lcd_init();
-   void memset(buffer,0xAA,512);
-   void lcd_push_buffer();
+   lcd_init();
+   lcd_graphics_buffer();
+   //lcd_write_string();
+    while(1)
+    {
 
-
-  while(1)
-  {
-
-  }
+    }
 }
