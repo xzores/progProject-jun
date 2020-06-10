@@ -14,12 +14,18 @@
 #include "stm32f30x_conf.h"
 #include "30010_io.h"
 
+void lcd_update(){
+
+
+}
 
 int main(void)
 {
-   lcd_init();
-   lcd_graphics_buffer();
-   lcd_write_string();
+    lcd_init();
+    uint8_t buf[512];
+    lcd_graphics_buffer(buf);
+    lcd_write_string(buf, "minecraft", 10,2);
+
     while(1)
     {
 
