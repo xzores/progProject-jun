@@ -91,20 +91,70 @@ int main(void) {
     /* Udregninger:
     Periodetid = (1+ARR)*(1+PSC) / ClockFreq = 10ms, 1/100sekund
     */
-    uint8_t joy = 0;
+    uint8_t joy = 0; //Joystick edge-detection
+    uint8_t split1Enable = 0; //Vis split1
+    uint8_t split1h = 0;
+    uint8_t split1s = 0;
+    uint8_t split1m = 0;
+    uint8_t split1H = 0;
+
+    uint8_t split2Enable = 0; //Vis split2
+    uint8_t split2h = 0;
+    uint8_t split2s = 0;
+    uint8_t split2m = 0;
+    uint8_t split2H = 0;
+
   while(1)
   {
     if(printSec) {
         printSec = 0;
-        printf("%d.%d.%d.%d\n", hours, minutes, seconds, hundreths);
+        printf("%d.%d.%d.--\n", hours, minutes, seconds);
+
+        if (split1Enable) {
+          printf("%d.%d.%d.%d\n", split1h , split1m, split1s, split1h);
+        }
+
+        if (split2Enable) {
+          printf("%d.%d.%d.%d\n", split2h , split2m, split2s, split2h);
+        }
     }
 
 
     if (joy != readJoystick()) {
+        joy = readJoystick();
         if (joy == 0x10) {
             TIM2->CR1 = !TIM2->CR1;
-            printf("h\n");
+            }
+        else if (joy == 0x07) {// joy left: Split 1
+            split1Enable = 1;
+            split1h = hundreths;
+            split1s = seconds;
+            split1m = minutes;
+            split1H = hours;
+        }
+
+        else if (joy == 0x08) {//joy right: Split 2, kun hvis split 1 allerede eksisterer
+            if (split1Enable) {
+            split2Enable = 1;
+            split2h = hundreths;
+            split2s = seconds;
+            split2m = minutes;
+            split2H = hours;
             }
         }
+
+        else if (joy == 0x03) { //Joy-Down: stop og reset
+            TIM2->CR1 = 0x00; //Sluk timer
+            TIM2->CNT = 0x00; //reset counter til 0.
+            hundreths = 0; // reset values.
+            seconds = 0;
+            minutes = 0;
+            hours = 0;
+            }
+
+        }
+
+        homeCurser();
     }
+
 }
