@@ -19,7 +19,7 @@ int main(void)
 {
    lcd_init();
    lcd_graphics_buffer();
-   //lcd_write_string();
+   lcd_write_string();
     while(1)
     {
 
