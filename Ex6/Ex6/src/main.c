@@ -102,7 +102,6 @@ int main(void) {
 
     if (joy != readJoystick()) {
         if (joy == 0x10) {
-            joy = 0;
             TIM2->CR1 = !TIM2->CR1;
             printf("h\n");
             }
