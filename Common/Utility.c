@@ -1,5 +1,3 @@
-
-
 #include "Utility.h"
 
 void setPortMode(GPIO_TypeDef * GPIO, char pin, uint8_t mode)   {

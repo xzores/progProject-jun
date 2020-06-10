@@ -3,12 +3,12 @@
 	<EmBitzVersion release="1.11" revision="0" />
 	<FileVersion major="1" minor="0" />
 	<Project>
-		<Option title="EX7" />
+		<Option title="Ex8" />
 		<Option pch_mode="2" />
 		<Option compiler="armgcc_eb" />
 		<Build>
 			<Target title="Debug">
-				<Option output="bin\Debug\EX7.elf" />
+				<Option output="bin\Debug\Ex8.elf" />
 				<Option object_output="obj\Debug\" />
 				<Option type="0" />
 				<Option compiler="armgcc_eb" />
@@ -35,7 +35,7 @@
 				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="bin\Release\EX7.elf" />
+				<Option output="bin\Release\Ex8.elf" />
 				<Option object_output="obj\Release\" />
 				<Option type="0" />
 				<Option create_hex="1" />
@@ -65,12 +65,12 @@
 			<Add option="$device=cortex-m4" />
 			<Add option="$stack=0x0100" />
 			<Add option="$heap=0x0000" />
-			<Add option="$lscript=./stm32f302r8_flash.ld" />
+			<Add option="$lscript=./stm32f302c6_flash.ld" />
 		</Device>
 		<Compiler>
 			<Add option="-mfloat-abi=soft" />
 			<Add option="-fno-strict-aliasing" />
-			<Add symbol="STM32F302R8" />
+			<Add symbol="STM32F302C6" />
 			<Add symbol="STM32F30X" />
 			<Add symbol="USE_STDPERIPH_DRIVER" />
 			<Add directory=".\inc" />
@@ -83,33 +83,29 @@
 			<Add option="-eb_start_files" />
 			<Add option="-eb_lib=n" />
 		</Linker>
-		<Unit filename="..\Common\30010_io.c">
+		<Unit filename="..\..\Common\30010_io.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\Common\30010_io.h" />
-		<Unit filename="..\Common\ansi.c">
+		<Unit filename="..\..\Common\30010_io.h" />
+		<Unit filename="..\..\Common\ansi.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\Common\ansi.h" />
-		<Unit filename="..\Common\charset.c">
+		<Unit filename="..\..\Common\ansi.h" />
+		<Unit filename="..\..\Common\GUI.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\Common\charset.h" />
-		<Unit filename="..\Common\GUI.c">
+		<Unit filename="..\..\Common\LUT.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\Common\LUT.c">
+		<Unit filename="..\..\Common\LUT.h" />
+		<Unit filename="..\..\Common\Utility.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\Common\LUT.h" />
-		<Unit filename="..\Common\Utility.c">
+		<Unit filename="..\..\Common\Utility.h" />
+		<Unit filename="..\..\Common\vector.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\Common\Utility.h" />
-		<Unit filename="..\Common\vector.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="..\Common\vector.h" />
+		<Unit filename="..\..\Common\vector.h" />
 		<Unit filename="cmsis\arm_common_tables.h" />
 		<Unit filename="cmsis\arm_math.h" />
 		<Unit filename="cmsis\core_cm4.h" />
@@ -217,13 +213,13 @@
 		<Unit filename="src\system_stm32f30x.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="stm32f302r8_flash.ld" />
-		<Unit filename="stm32f302r8_sram.ld" />
+		<Unit filename="stm32f302c6_flash.ld" />
+		<Unit filename="stm32f302c6_sram.ld" />
 		<Extensions>
 			<code_completion />
 			<debugger>
 				<target_debugging_settings target="Debug" active_interface="OpenOCD">
-					<debug_interface interface_id="OpenOCD" ip_address="localhost" ip_port="3333" path="C:\Users\Bruger\Documents\GitHub\progProject-jun\OCD\bin-x64" executable="openocd.exe" description="" dont_start_server="false" backoff_time="100" options="0" reg_filter="0" active_family="All" gdb_before_conn="" gdb_after_conn="">
+					<debug_interface interface_id="OpenOCD" ip_address="localhost" ip_port="3333" path="C:\Users\FU18OWZ\Documents\GitHub\progProject-jun\OCD\bin-x64" executable="openocd.exe" description="" dont_start_server="false" backoff_time="100" options="0" reg_filter="0" active_family="All" gdb_before_conn="" gdb_after_conn="">
 						<family_options family_id="All">
 							<option opt_id="ID_BOARD_CH" opt_value="" />
 							<option opt_id="ID_INTERFACE_CH" opt_value="stlink-v2-1" />
@@ -254,7 +250,7 @@
 					</debug_interface>
 				</target_debugging_settings>
 				<target_debugging_settings target="Release" active_interface="OpenOCD">
-					<debug_interface interface_id="OpenOCD" ip_address="localhost" ip_port="3333" path="C:\Users\Bruger\Documents\GitHub\progProject-jun\OCD\bin-x64" executable="openocd.exe" description="" dont_start_server="false" backoff_time="100" options="0" reg_filter="0" active_family="All" gdb_before_conn="" gdb_after_conn="">
+					<debug_interface interface_id="OpenOCD" ip_address="localhost" ip_port="3333" path="C:\Users\FU18OWZ\Documents\GitHub\progProject-jun\OCD\bin-x64" executable="openocd.exe" description="" dont_start_server="false" backoff_time="100" options="0" reg_filter="0" active_family="All" gdb_before_conn="" gdb_after_conn="">
 						<family_options family_id="All">
 							<option opt_id="ID_BOARD_CH" opt_value="" />
 							<option opt_id="ID_INTERFACE_CH" opt_value="stlink-v2-1" />
