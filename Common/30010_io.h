@@ -26,7 +26,8 @@ void uart_clear();
 void lcd_init();
 void lcd_transmit_byte(uint8_t data);
 void lcd_push_buffer(uint8_t* buffer);
-void lcd_grahics_buffer();
+void lcd_write_string(uint8_t* buf, const char* toPrint, uint8_t x, uint8_t y);
+uint8_t* lcd_graphics_buffer();
 void lcd_reset();
 
 #endif /* _30010_IO_H_ */
