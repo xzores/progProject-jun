@@ -234,12 +234,7 @@ void lcd_shift_right(uint8_t* buf, uint8_t* shiftBuf, int16_t offset){
     }
 }
 
-void lcd_update()
-{
 
-
-
-}
 
 void lcd_reset()
 {
