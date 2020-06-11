@@ -20,7 +20,7 @@ uint8_t h;
 uint8_t s;
 uint8_t m;
 uint8_t H;
-} time;
+};
 
 struct time timer;
 
@@ -48,9 +48,7 @@ void TIM2_IRQHandler(void) {
     TIM2->SR &= ~0x0001; //Clear interrupt bit
 }
 
-
-
-void resetTimer(struct time timer) {
+void resetTimer(struct time* timer) {
     timer.h = 0;
     timer.s = 0;
     timer.m = 0;
@@ -84,20 +82,12 @@ int main(void) {
 
     printf("%d.%d.%d.%d", timer.H, timer.m, timer.s, timer.h);//0.0.0.0
 
-
-    //Opsætning af timer---------------------------
-    RCC->APB1ENR |= RCC_APB1Periph_TIM2; //Enable Clockline to timer 2.
-    TIM2->CR1 = 0x01; //Timer enabled, all other bits disabled
-    TIM2->ARR = 0xFF; //Reload value sat til 256-1.
-    TIM2->PSC = 0x9C3; //Prescale sat til 2500-1 (maximum) (-1 pga formel)
-    //Interrupts------------------------
-    TIM2->DIER |= 0x0001; //Enable Timer 2 Interrupts
-    NVIC_SetPriority(TIM2_IRQn, 0x0); //Set Interrupt Priority
-    NVIC_EnableIRQ(TIM2_IRQn); //Enable interrupt
+    setupTimer(TIM2, RCC_APB1Periph_TIM2, 0xFF, 0x9C3);
+    setupTimerInterupts(TIM2, TIM2_IRQn, 1);
 
     uint8_t joy = 0; //Joystick edge-detection
 
-    resetTimer(timer);
+    resetTimer();
 
   while(1)
   {
