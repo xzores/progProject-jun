@@ -223,12 +223,16 @@ void lcd_shift_right(uint8_t* buf, uint8_t* shiftBuf, int16_t offset){
 
     int i = 0;
 
+    int16_t off = offset % DISP_LENGTH;
+
     for(i = 0; i < 3; i++){
-        int16_t memStart = offset + DISP_LENGTH * i;
-        //int16_t memEnd = DISP_LENGTH + DISP_LENGTH * i;
-        int16_t memLength = DISP_LENGTH - offset;
+        int16_t memStart = off + DISP_LENGTH * i;
+        int16_t memEnd = DISP_LENGTH + DISP_LENGTH * i;
+        int16_t memLength = DISP_LENGTH - off;
 
         memcpy(shiftBuf + DISP_LENGTH * i, buf + memStart, memLength);
+        memcpy(shiftBuf + memLength + DISP_LENGTH * i, buf + DISP_LENGTH * i, off);
+        //374, 256, 265
     }
 }
 

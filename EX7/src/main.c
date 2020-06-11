@@ -29,9 +29,9 @@ static uint8_t printClear = 0;
 
 void TIM2_IRQHandler(void) {
     timer.h++;
+    printSec = (timer.h % 10) == 0;
+    printClear = (timer.h % 10) != 0;
     if (timer.h >= 100) {
-        printSec = (timer.s % 2) == 0;
-        printClear = (timer.s % 2) != 0;
         timer.h = 0;
         timer.s++;
     }
@@ -67,7 +67,6 @@ void lcd_update(uint8_t* buf, uint8_t* shiftBuf){
         printSec = 0;
         lcd_write_string(buf, "hello world", 5,1);
         i++;
-        i = i % 10;
     }
      if(printClear){
         printClear = 0;
