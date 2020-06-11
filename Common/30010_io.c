@@ -194,11 +194,12 @@ void setCharHelper(uint8_t* buf, uint8_t charIndex, uint16_t position){
     memcpy(buf + position, c, 5 * sizeof(char)); // Sets first element to some char
 }
 
+#define INTER_BUF_LENGTH 128*2
 #define DISP_LENGTH 128
 
 void setChar(uint8_t* buf, char c, uint8_t x, uint8_t y){
 
-    uint16_t p = x * 5 + DISP_LENGTH * y;
+    uint16_t p = x * 5 + INTER_BUF_LENGTH * y;
     uint8_t index = (uint8_t) c - 32;
     setCharHelper(buf, index, p);
 }
@@ -223,15 +224,12 @@ void lcd_shift_right(uint8_t* buf, uint8_t* shiftBuf, int16_t offset){
 
     int i = 0;
 
-    int16_t off = offset % DISP_LENGTH;
-
     for(i = 0; i < 3; i++){
-        int16_t memStart = off + DISP_LENGTH * i;
-        int16_t memEnd = DISP_LENGTH + DISP_LENGTH * i;
-        int16_t memLength = DISP_LENGTH - off;
+        int16_t memStart = (offset % INTER_BUF_LENGTH) + INTER_BUF_LENGTH * i;
+        int16_t memLength = DISP_LENGTH - (offset % DISP_LENGTH);
 
         memcpy(shiftBuf + DISP_LENGTH * i, buf + memStart, memLength);
-        memcpy(shiftBuf + memLength + DISP_LENGTH * i, buf + DISP_LENGTH * i, off);
+        memcpy(shiftBuf + memLength + DISP_LENGTH * i, buf + INTER_BUF_LENGTH * i, (offset % DISP_LENGTH));
         //374, 256, 265
     }
 }

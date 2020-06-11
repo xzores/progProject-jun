@@ -77,12 +77,13 @@ void lcd_update(uint8_t* buf, uint8_t* shiftBuf){
 int main(void)
 {
     lcd_init();
-    uint8_t buf[512];
+    uint8_t buf[512*2];
     uint8_t shiftBuf[512];
     lcd_graphics_buffer(buf);
     lcd_graphics_buffer(shiftBuf);
     lcd_write_string(buf, "minecraft", 10,2);
     lcd_write_string(buf, "hurdisalt", 5,0);
+    lcd_write_string(buf, "Hej, dette er longer than the display", 5,0);
     lcd_shift_right(buf, shiftBuf, 10);
     lcd_push_buffer(shiftBuf);
 
