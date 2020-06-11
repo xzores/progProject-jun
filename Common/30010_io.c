@@ -228,7 +228,6 @@ void lcd_write_string(uint8_t* buf, const char* toPrint, uint8_t x, uint8_t y)
     lcd_push_buffer(buf);
 }
 
-
 void lcd_reset()
 {
     GPIOA->ODR &= ~(0x0001 << 8); // A0 = 0 - Reset Command/Data
@@ -259,6 +258,7 @@ void lcd_reset()
 
     lcd_transmit_byte(0xA6);  // Set normal mode
 }
+
 
 void lcd_init() {
     // Enable Clocks
