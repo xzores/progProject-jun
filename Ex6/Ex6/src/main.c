@@ -14,6 +14,9 @@
 #include "stm32f30x_conf.h"
 #include "30010_io.h"
 #include "Utility.h"
+#include <stdlib.h>
+#include <string.h>
+
 
 struct time{
 uint8_t h;
@@ -26,6 +29,54 @@ struct time timer;
 
 static uint8_t printSec = 0;
 
+//6.2---------------------------------------
+
+
+uint16_t readFromTerminal(char * s, uint16_t limit) { //Tager en pointer til et chararray
+    //uart_clear();
+    static uint16_t i;
+
+    char c = uart_get_char(); //Første char indlæses i arrayet
+    while (c != '\0') { // 0 eller enter
+
+        if(c == '\r' || i >= limit){
+            s[i] = '\0'; //Der sættes \0 på første index efter input-string.
+            i = 0;
+            return i;
+        }
+
+        s[i] = c; //Værdien på adressen s[i] sættes til værdi af typen char.
+        printf("%c",c); //printer nuværende string
+        i++;
+        c = uart_get_char();
+    }
+
+    return i;
+}
+
+void resetInput(char * s) {
+    uint8_t j;
+    while(s[j] != '\0') {
+        s[j] = 0;
+        j++;
+    }
+}
+
+int compare_string(char *first, char *second)
+{
+   while(*first==*second)
+   {
+      if ( *first == '\0' || *second == '\0' )
+         break;
+
+      first++;
+      second++;
+   }
+   if( *first == '\0' && *second == '\0' )
+      return 0;
+   else
+      return -1;
+}
 
 void TIM2_IRQHandler(void) {
     timer.h++;
@@ -60,7 +111,9 @@ void resetTimer(struct time timer) {
 
 int main(void) {
     uart_init(9600);
-    clearTermninal();
+    homeCurser(); //Sæt curser til 0,0
+    clearTermninal(); // Ryd terminal
+
     //Joystick pins---------------------
     RCC->AHBENR |= RCC_AHBPeriph_GPIOA; //Enabling clock for IO Port A
     RCC->AHBENR |= RCC_AHBPeriph_GPIOB;
@@ -81,8 +134,14 @@ int main(void) {
 
     setPortMode(DOWN_JOY_STICK, IN_MODE);
     setPortPuPd(DOWN_JOY_STICK, NO_PULL);
-
+    gotoxy(5,5);
     printf("%d.%d.%d.%d", timer.H, timer.m, timer.s, timer.h);//0.0.0.0
+    gotoxy(5,6);
+    printf("Splittime #1:");
+    gotoxy(5,7);
+    printf("Splittime #2:");
+    gotoxy(5,8);
+    printf("Type 'Help' if u stupid");
 
 
     //Opsætning af timer---------------------------
@@ -96,17 +155,44 @@ int main(void) {
     NVIC_EnableIRQ(TIM2_IRQn); //Enable interrupt
 
     uint8_t joy = 0; //Joystick edge-detection
-
+    uint16_t readBytes = 0;
     resetTimer(timer);
+
+    //Lav boks
+    window(2,2,7,34,'B',"Timer");
+
+
+    //Brugerinput init stuff------------------------------------
+
+    char array_p[1024];
+
+
+
+    /*
+    uint8_t i;
+    for (i = 0; i < 5; i++) {
+        printf("%s", *array_p);
+        array_p++;
+
+    }
+    int result;
+
+
+
+    result = compare_string(array_p, "Start"); //Sammenligning af strings
+    printf("%d\n", result);
+    */
+
 
   while(1)
   {
-    gotoxy(0,0);
+    gotoxy(5,5);
     if(printSec) {
         printSec = 0;
-        printf("%d.%d.%d.--", timer.H, timer.m, timer.s);
-        gotoxy(0,0);
+        printf("%02d.%02d.%02d.--", timer.H, timer.m, timer.s);
     }
+
+    gotoxy(20,5);
 
 
     if (joy != readJoystick()) {
@@ -114,16 +200,16 @@ int main(void) {
         if (joy == 0x10) {
             TIM2->CR1 = !TIM2->CR1;
             }
-        else if (joy == 0x04) {// joy left: Split 1
-            gotoxy(0,2);
+        else if (joy == 0x04) {// joy readBytesleft: Split 1
+            gotoxy(22,6);
             printf("%d.%d.%d.%d", timer.H, timer.m, timer.s,timer.h);
-            homeCurser();
+
         }
 
         else if (joy == 0x08) {//joy right: Split 2, kun hvis split 1 allerede eksisterer
-            gotoxy(0,3);
+            gotoxy(22,7);
             printf("%d.%d.%d.%d", timer.H, timer.m, timer.s,timer.h);
-            homeCurser();
+
         }
 
         else if (joy == 0x02) { //Joy-Down: stop og reset
@@ -138,8 +224,64 @@ int main(void) {
             printf("%d.%d.%d.%d", timer.H, timer.m, timer.s,timer.h);
 
             }
-
+            gotoxy(20,5);
         }
+
+        // Bruger input af tekst--------------------
+        //gotoxy(1,5);
+        gotoxy(20,5);
+        printf("|");
+        gotoxy(21 + readBytes,5);//Brugerinputtet skulle nu være på array[i], hvor pegeren peger.
+        uint16_t rB = readFromTerminal(array_p, 10);
+        if(readBytes > rB){
+            gotoxy(21,5);//Brugerinputtet skulle nu være på array[i], hvor pegeren peger.
+            printf("          ");
+        }
+        readBytes = rB;
+
+        uint8_t didSomething = 1;
+
+        if(!strcmp(array_p, "Start") && readBytes == 0){
+            TIM2->CR1 = 0x01; //timer enable
+            }
+        else if (!strcmp(array_p, "Stop") && readBytes == 0) {
+            TIM2->CR1 = 0x00; //Timer disable
+        }
+        else if (!strcmp(array_p, "Split1") && readBytes == 0) {
+            gotoxy(22,6);
+            printf("%d.%d.%d.%d", timer.H, timer.m, timer.s,timer.h);
+            resetInput(array_p);
+        }
+        else if (!strcmp(array_p, "Split2") && readBytes == 0) {
+            gotoxy(22,7);
+            printf("%d.%d.%d.%d", timer.H, timer.m, timer.s,timer.h);
+        }
+        else if (!strcmp(array_p, "Reset") && readBytes == 0) {
+            TIM2->CR1 = 0x00; //Sluk timer
+            TIM2->CNT = 0x00; //reset counter til 0.
+            resetTimer(timer);
+
+            gotoxy(0,2);
+            printf("%d.%d.%d.%d", timer.H, timer.m, timer.s,timer.h);
+
+            gotoxy(0,3);
+            printf("%d.%d.%d.%d", timer.H, timer.m, timer.s,timer.h);
+        }
+        else if (!strcmp
+                (array_p, "Help") && readBytes == 0) {
+            gotoxy(3,12);
+            printf("U stupid\nType 'Start' or 'Stop' to start/stop watch,\n and 'Split1' or '-2' for splittimes!");
+        }
+        else{
+
+            didSomething = 0;
+        }
+
+        if(didSomething)
+            array_p[0] = '\0';
+
+        //if(readFromTerminal(array_p, ))
+        //printf("done %s", array_p);
     }
 
 }

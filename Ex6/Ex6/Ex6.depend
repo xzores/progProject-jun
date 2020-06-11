@@ -1,8 +1,10 @@
 # depslib dependency file v1.0
-1591785560 source:c:\users\anders\documents\gittest2\progproject-jun\common\30010_io.c
+1591820887 source:c:\users\anders\documents\gittest2\progproject-jun\common\30010_io.c
 	"30010_io.h"
+	"charset.h"
+	<string.h>
 
-1591793706 c:\users\anders\documents\gittest2\progproject-jun\common\30010_io.h
+1591820887 c:\users\anders\documents\gittest2\progproject-jun\common\30010_io.h
 	"stm32f30x_conf.h"
 	<stdio.h>
 
@@ -133,7 +135,7 @@
 
 1591785560 c:\users\anders\documents\gittest2\progproject-jun\common\lut.h
 
-1591785560 source:c:\users\anders\documents\gittest2\progproject-jun\common\utility.c
+1591801989 source:c:\users\anders\documents\gittest2\progproject-jun\common\utility.c
 	"Utility.h"
 
 1591793569 c:\users\anders\documents\gittest2\progproject-jun\common\utility.h
@@ -224,13 +226,17 @@
 	"stm32f30x_wwdg.h"
 	"stm32f30x_rcc.h"
 
-1591792420 source:c:\users\anders\documents\gittest2\progproject-jun\ex6\ex6\src\main.c
+1591881082 source:c:\users\anders\documents\gittest2\progproject-jun\ex6\ex6\src\main.c
 	"stm32f30x_conf.h"
 	"30010_io.h"
 	"Utility.h"
+	<stdlib.h>
+	<string.h>
 
-1591730833 source:c:\users\anders\documents\gittest2\progproject-jun\ex6\ex6\src\startup_stm32f30x.s
+1591872396 source:c:\users\anders\documents\gittest2\progproject-jun\ex6\ex6\src\startup_stm32f30x.s
 
 1591730833 source:c:\users\anders\documents\gittest2\progproject-jun\ex6\ex6\src\system_stm32f30x.c
 	"stm32f30x.h"
+
+1591801989 c:\users\anders\documents\gittest2\progproject-jun\common\charset.h
 
