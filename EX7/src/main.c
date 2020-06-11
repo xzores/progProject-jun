@@ -25,6 +25,7 @@ int main(void)
     uint8_t buf[512];
     lcd_graphics_buffer(buf);
     lcd_write_string(buf, "minecraft", 10,2);
+    lcd_write_string(buf, "hurdisalt", 5,0);
 
     while(1)
     {
