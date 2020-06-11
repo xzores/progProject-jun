@@ -56,33 +56,44 @@ void resetTimer() {
     timer.H = 0;
 }
 
+static int i = 0;
 
-void lcd_update(){
+void lcd_update(uint8_t* buf, uint8_t* shiftBuf){
 
+    lcd_shift_right(buf, shiftBuf, i);
+    lcd_push_buffer(shiftBuf);
 
+    if(printSec){
+        printSec = 0;
+        lcd_write_string(buf, "hello world", 5,1);
+        i++;
+        i = i % 10;
+    }
+     if(printClear){
+        printClear = 0;
+        lcd_write_string(buf, "           ", 5,1);
+    }
 }
 
 int main(void)
 {
     lcd_init();
     uint8_t buf[512];
+    uint8_t shiftBuf[512];
     lcd_graphics_buffer(buf);
+    lcd_graphics_buffer(shiftBuf);
     lcd_write_string(buf, "minecraft", 10,2);
     lcd_write_string(buf, "hurdisalt", 5,0);
+    lcd_shift_right(buf, shiftBuf, 10);
+    lcd_push_buffer(shiftBuf);
 
     resetTimer();
     setupTimer(TIM2, RCC_APB1Periph_TIM2, 0xFF, 0x9C3);
     setupTimerInterupts(TIM2, TIM2_IRQn, 1);
 
+
     while(1)
     {
-        if(printSec){
-            printSec = 0;
-            lcd_write_string(buf, "hello world", 5,1);
-        }
-         if(printClear){
-            printClear = 0;
-            lcd_write_string(buf, "           ", 5,1);
-        }
+        lcd_update(buf, shiftBuf);
     }
 }

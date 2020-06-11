@@ -205,14 +205,7 @@ void setChar(uint8_t* buf, char c, uint8_t x, uint8_t y){
 
 uint8_t* lcd_graphics_buffer(uint8_t* buf)
 {
-
-    memset(buf,0xAA,512); // Sets each element of the buffer to 0xAA
-    setChar(buf, 'A', 0,0);
-    setChar(buf, ' ', 1,1);
-    setChar(buf, '!', 5,2);
-    setChar(buf, '!', 11,3);
-
-    lcd_push_buffer(buf);
+    memset(buf,0x00,512); // Sets each element of the buffer to 0xAA
 }
 
 void lcd_write_string(uint8_t* buf, const char* toPrint, uint8_t x, uint8_t y)
@@ -224,8 +217,19 @@ void lcd_write_string(uint8_t* buf, const char* toPrint, uint8_t x, uint8_t y)
         setChar(buf, c, x + i, y);
         i++;
     }
+}
 
-    lcd_push_buffer(buf);
+void lcd_shift_right(uint8_t* buf, uint8_t* shiftBuf, int16_t offset){
+
+    int i = 0;
+
+    for(i = 0; i < 3; i++){
+        int16_t memStart = offset + DISP_LENGTH * i;
+        //int16_t memEnd = DISP_LENGTH + DISP_LENGTH * i;
+        int16_t memLength = DISP_LENGTH - offset;
+
+        memcpy(shiftBuf + DISP_LENGTH * i, buf + memStart, memLength);
+    }
 }
 
 void lcd_reset()
