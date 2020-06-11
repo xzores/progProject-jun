@@ -67,8 +67,8 @@ int main(void) {
     RCC->AHBENR |= RCC_AHBPeriph_GPIOC;
     RCC->AHBENR |= RCC_AHBPeriph_GPIOD;
 
-    setPortMode(RIGHT_JOY_STICK, IN_MODE); //Porten RJS er forbundet til s�ttes til input-mode.
-    setPortPuPd(RIGHT_JOY_STICK, NO_PULL); //Porten er forbundet til 1/0 i hardware, det er ikke n�dvendigt med pull ?? Anders
+    setPortMode(RIGHT_JOY_STICK, IN_MODE); //Porten RJS er forbundet til sættes til input-mode.
+    setPortPuPd(RIGHT_JOY_STICK, NO_PULL); //Porten er forbundet til 1/0 i hardware, det er ikke nødvendigt med pull ?? Anders
 
     setPortMode(UP_JOY_STICK, IN_MODE);
     setPortPuPd(UP_JOY_STICK, NO_PULL);
