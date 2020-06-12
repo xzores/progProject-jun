@@ -21,6 +21,7 @@
 #define GREEN_LED GPIOC, 7
 #define RED_LED GPIOB, 4
 
+//self explanatory
 inline int32_t power(int32_t a, int32_t exp) {
 // calculates a^exp
  int32_t i, r = 1;

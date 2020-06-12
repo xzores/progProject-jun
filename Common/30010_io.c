@@ -188,6 +188,7 @@ void lcd_push_buffer(uint8_t* buffer)
     }
 }
 
+//helper function sets a char at memory position.
 void setCharHelper(uint8_t* buf, uint8_t charIndex, uint16_t position){
 
     char* c = &character_data[charIndex][0];
@@ -196,29 +197,25 @@ void setCharHelper(uint8_t* buf, uint8_t charIndex, uint16_t position){
 
 #define DISP_LENGTH 128
 
+//sets a char at pixel position of x,y
 void setChar(uint8_t* buf, char c, uint8_t x, uint8_t y){
 
     uint16_t p = x * 5 + DISP_LENGTH * y;
-    uint8_t index = (uint8_t) c - 32;
+    uint8_t index = (uint8_t) c - 32; //we convert from ascii to character_data format
     setCharHelper(buf, index, p);
 }
 
 uint8_t* lcd_graphics_buffer(uint8_t* buf)
 {
 
-    memset(buf,0xAA,512); // Sets each element of the buffer to 0xAA
-    setChar(buf, 'A', 0,0);
-    setChar(buf, ' ', 1,1);
-    setChar(buf, '!', 5,2);
-    setChar(buf, '!', 11,3);
-
-    lcd_push_buffer(buf);
+    memset(buf,0xAA,512); //clears the screen (fills the buffer with 0)
 }
 
 void lcd_write_string(uint8_t* buf, const char* toPrint, uint8_t x, uint8_t y)
 {
     int i = 0;
 
+    //for each char we increase i, moving 1 char to the right and print that char to the lcd screen.
     while(toPrint[i] != '\0'){
         char c = toPrint[i];
         setChar(buf, c, x + i, y);

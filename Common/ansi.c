@@ -21,7 +21,7 @@ void fgcolor(uint8_t foreground) {
   printf("%c[%d;%dm", ESC, type, foreground+30);
 }
 
-
+//clears the terminal
 void clearTermninal(){
 
     printf("%c[2J", ESC);
@@ -32,6 +32,7 @@ void clreol(){
     printf("%c[K", ESC);
 }
 
+//sets the cursor to the x,y position
 void gotoxy(uint8_t x_1, uint8_t y_1) {
     int x = y_1;
     int y = x_1;
@@ -43,6 +44,7 @@ void homeCurser(){
     printf("%c[H", ESC);
 }
 
+//turns on/off underline
 void underline (uint8_t on) {
     if (on == 0) {
         printf("%c[%dm", ESC, 24);
@@ -59,6 +61,7 @@ void blink(uint8_t on) {
     }
 }
 
+//turn on/off inverse colors
 void inverse(uint8_t on) {
      if (on == 0) {
         printf("%c[%dm", ESC, 27);
@@ -67,10 +70,12 @@ void inverse(uint8_t on) {
     }
 }
 
+//move the cursor i chars forward
 void moveForward(uint8_t i) {
     printf("%c[1%dm", ESC, i, 'C');
 }
 
+//show/hide cursor
 void showCursor(uint8_t show) {
 
   if (show) {
@@ -82,6 +87,7 @@ void showCursor(uint8_t show) {
 
 }
 
+//sets the bg color
 void bgcolor(uint8_t background) {
 /* IMPORTANT:   When you first use this function you cannot get back to true white background in HyperTerminal.
    Why is that? Because ANSI does not support true white background (ANSI white is gray to most human eyes).
@@ -119,12 +125,14 @@ void resetbgcolor() {
   printf("%c[m", ESC);
 }
 
+//this struct is used to save what chars should be placed where.
 struct borderStyle{
     uint16_t leftTopCorner, leftWall, rightWall,
     rightTopcorner, vertical, leftBottomCorner,
     horizontal, rigtBottomCorner;
 } default_borderStyle = {218,180,195,191,179,192,196,217};
 
+//creates a window in putty
 void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char title[]) {
     int x1 = y_1 + 1;
     int y1 = x_1 + 1;
@@ -143,7 +151,7 @@ void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char 
     if (style == 'A') {
         myStyle = default_borderStyle;
     }
-    else if (style == 'B') {
+    else if (style == 'B') { //we we want to change to be, these are the new values for borderStyle
         myStyle.leftTopCorner = 201;
         myStyle.leftWall = 185;
         myStyle.rightWall = 204;
@@ -155,14 +163,18 @@ void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char 
 
     }
 
-    //charcount
+
     int charCount = 0;
     while (title[charCount] != '\0') {
         charCount++;
     }
 
+    //if the title is an empty string then we simply make a box.
     if(charCount != 0)
     {
+        //with title
+
+        //prints the top
         gotoxy(xpos,ypos);
         printf("%c%c", myStyle.leftTopCorner, myStyle.leftWall);
         inverse(1);
@@ -179,7 +191,9 @@ void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char 
     }
     else
     {
-        //top
+        //simply a box
+
+        //prints the top
         gotoxy(xpos,ypos);
         printf("%c", myStyle.leftTopCorner);
         for (i = 0; i < (x2)-2; i++) {
@@ -190,7 +204,8 @@ void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char 
 
     ypos = y1 + 1;
     xpos = x1;
-    //Lodrette linjer venstre
+
+    //prints the Lodrette linjer venstre
     for(i = 0; i < (y2-1); i++){
         gotoxy(xpos,ypos);
         printf("%c", myStyle.vertical);
@@ -199,7 +214,8 @@ void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char 
 
     ypos = y1 + 1;
     xpos = x1 + x2 - 1;
-    //Lodrette linjer right
+
+    //prints the Lodrette linjer right
     for(i = 0; i < (y2-1); i++){
         gotoxy(xpos,ypos);
         printf("%c", myStyle.vertical);
@@ -208,77 +224,13 @@ void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char 
 
     ypos = y1 + y2;
     xpos = x1;
-    //bottom
+
+    //prints the bottom
     gotoxy(xpos,ypos);
     printf("%c", myStyle.leftBottomCorner);
     for (i = 0; i < x2 - 2; i++) {
         printf("%c", myStyle.horizontal);
     }
     printf("%c", myStyle.rigtBottomCorner);
-
-
-
 }
-
-/*
-        //charcount
-        int charCount = 0;
-        while (title[charCount] != '\0') {
-            charCount++;
-        }
-
-        int i;
-        int k;
-
-        if(charCount != 0)
-        {
-            inverse(1);
-            printf("%c%c", myStyle.leftTopCorner, myStyle.leftWall);
-            for (i = 0; i < x1; i++) {
-                printf(" ");
-            }
-            printf("%s", title);
-            for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
-                printf(" ");
-            }
-
-            inverse(0);
-            printf("%c%c\n", myStyle.rightWall,myStyle.rightTopcorner);
-        }
-        else{
-            for (i = 0; i < x1; i++) {
-                printf(" ");
-            }
-
-            printf("%c", myStyle.leftTopCorner);
-            for (i = 0; i < (x2-x1)-2; i++) {
-                printf("%c", myStyle.horizontal);
-            }
-            printf("%c\n", myStyle.rightTopcorner);
-        }
-
-        //Lodrette linjer
-        for(i = 0; i < (y2-y1-2); i++){
-            for (k = 0; k < x1; k++) {
-                printf(" ");
-            }
-            printf("%c", myStyle.vertical);
-            int j;
-            for (j = 0; j < (x2-x1)-2; j++) {
-                printf(" ");
-            }
-            printf("%c\n", myStyle.vertical);
-        }
-
-
-        //Bundlinje
-        for (k = 0; k < x1; k++) {
-                printf(" ");
-            }
-        printf("%c",myStyle.leftBottomCorner);
-        for (i = 0; i < (x2-x1)-2; i++) {
-          printf("%c", myStyle.horizontal);
-        }
-        printf("%c\n",myStyle.rigtBottomCorner);
-*/
 
