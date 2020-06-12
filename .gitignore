@@ -29,6 +29,7 @@
 *.dylib
 
 # Executables
+*.exe
 *.out
 *.app
 *.i*86
@@ -50,4 +51,8 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-
+Ex1/Ex1.depend
+Ex1/Ex1.depend
+Ex1/Ex1.ebp
+*.elay
+*.elay
