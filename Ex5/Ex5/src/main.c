@@ -14,25 +14,6 @@
 #include "stm32f30x_conf.h"
 #include "30010_io.h"
 
-#define IN_MODE 0x00000000
-#define OUT_MODE 0x00000001
-#define ALT_MODE 0x00000002
-#define ANAL_MODE 0x00000003
-
-#define NO_PULL 0x00000000
-#define PULL_UP 0x00000001
-#define PULL_DOWN 0x00000002
-
-#define RIGHT_JOY_STICK GPIOC, 0
-#define UP_JOY_STICK GPIOA, 4
-#define CENTER_JOY_STICK GPIOB, 5
-#define LEFT_JOY_STICK GPIOC, 1
-#define DOWN_JOY_STICK GPIOB, 0
-
-#define BLUE_LED GPIOA, 9
-#define GREEN_LED GPIOC, 7
-#define RED_LED GPIOB, 4
-
 int main(void) {
     uart_init( 9600 );
 
