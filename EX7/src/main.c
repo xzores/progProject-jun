@@ -21,10 +21,10 @@ void lcd_update(){
 
 int main(void)
 {
-    lcd_init();
-    uint8_t buf[512];
-    lcd_graphics_buffer(buf);
-    lcd_write_string(buf, "minecraft", 10,2);
+    lcd_init(); //self explanatory
+    uint8_t buf[512]; //the display buffer
+    lcd_graphics_buffer(buf);  //init the display buffer
+    lcd_write_string(buf, "minecraft", 10,2); //print mincraft to it.
 
     while(1)
     {
