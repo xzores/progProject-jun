@@ -71,5 +71,4 @@ void setupTimerInterupts(TIM_TypeDef* TIM, uint8_t TIM_IRQn,  uint8_t priority){
     TIM->DIER |= 0x0001; //Enable Timer 2 Interrupts
     NVIC_SetPriority(TIM_IRQn, priority); //Set Interrupt Priority
     NVIC_EnableIRQ(TIM_IRQn); //Enable interrupt
-    return val;
 }
