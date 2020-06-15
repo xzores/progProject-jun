@@ -77,19 +77,19 @@ void lcd_update(uint8_t* buf, uint8_t* shiftBuf){
 int main(void)
 {
     lcd_init();
-    uint8_t buf[512*2];
-    uint8_t shiftBuf[512];
-    lcd_graphics_buffer(buf, 512*2);
-    lcd_graphics_buffer(shiftBuf, 512);
-    lcd_write_string(buf, "minecraft", 10,2);
-    lcd_write_string(buf, "hurdisalt", 5,0);
-    lcd_write_string(buf, "Hej, dette er longer than the display", 5,0);
-    lcd_shift_right(buf, shiftBuf, 10);
-    lcd_push_buffer(shiftBuf);
+    uint8_t buf[512*2]; // the internal buffer
+    uint8_t shiftBuf[512]; // the display buffer
+    lcd_graphics_buffer(buf, 512*2); //init the internal buffer
+    lcd_graphics_buffer(shiftBuf, 512); //init the display buffer
+    lcd_write_string(buf, "minecraft", 10,2); //write to the internal buffer
+    lcd_write_string(buf, "hurdisalt", 5,0); //write to the internal buffer
+    lcd_write_string(buf, "Hej, dette er longer than the display", 5,0); // write to the internal displat
+    lcd_shift_right(buf, shiftBuf, 10); //copy from internal buffer to display buffer at location.
+    lcd_push_buffer(shiftBuf); // push view
 
-    resetTimer();
-    setupTimer(TIM2, RCC_APB1Periph_TIM2, 0xFF, 0x9C3);
-    setupTimerInterupts(TIM2, TIM2_IRQn, 1);
+    resetTimer(); //setup timer
+    setupTimer(TIM2, RCC_APB1Periph_TIM2, 0xFF, 0x9C3); //setup timer
+    setupTimerInterupts(TIM2, TIM2_IRQn, 1); //setup timer
 
 
     while(1)

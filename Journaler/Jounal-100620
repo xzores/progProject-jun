@@ -1,0 +1,26 @@
+//Exercise 6 ------------------------------------------------------------------
+I denne øvelse gøres brug af timer 2 i STM32 chippen. Først tilsluttes timeren til clockline - chippens on-board clockfrekvens på 64 MHz er dermed tilsluttet timeren. Derefter enables timeren. Den tæller dermed med chippens frekvens, hvis ikke man konfigurerer Prescale, som gøres her. Der ønskes at timeren tæller med en frekvens på 100 Hz (hundrededele af et sekund), hvorefter sekunder, minutter og timer kan tælles som funktion af hundrededelene.
+
+Prescaler dividerer clockfrekvensen, således at man tæller langsommere. Reload value angiver hvornår timeren starter forfra med at tælle (fra 0 og op). Reload value sættes til 255 og prescaler til 2499, da det giver den ønskede frekvens.
+
+Frekvens = 64*10^6 / ( (reload + 1 ) * (prescaler + 1) ) = 100 Hz
+
+Timer Interrupt'en kaldes hver gang at timeren har talt til sin reloadværdi, og ved at konfigurere Interrupt handleren TIM2_IRQHandler() vælger vi hvad der skal ske hundrede gange i sekundet.  En struct 'time' indeholer fire data, hundrededele, sekunder, minutter og timer. Disse opdateres i TIM2_IRQHandler. Der lægges én til 'h' for hver hundrededele af et sekund. Når h = 100 resettes den til 0, og der lægges én til sekund. På den måde fortsætter det med minutter og timer, og dermed kører der en timer. Slutteligt i TIM2_IRQHandler disables interruptet ved at sætte interrupt-bitten lavt i det dertilhørende register. Dette gøres så opdateringen ikke kører igen, før at interrupt'et aktiveres ved reload-værdien.
+
+//Splittimes
+Splittimer værdier sættes ved at printe værdierne i 'time' structet, i det øjeblik hvor splittiden kaldes. Der er to splittimes. Split2 kan ikke kaldes, før man har brugt split1, hvilket er et mere naturligt flow. Dette opnås med at sætte en variabel høj, når split1 er brugt, og derefter kigge efter denne i split2 med et simpelt if-statement.
+
+//Stop-clock og reset
+Timeren kan stoppes ved at kalde en af register-funktionerne, og sætte enable-bitten lavt. Counteren sættes ligeledes lig 0, og der kaldes en funktion, resetTimer(), som sætter variablerne i 'time' structen lig 0. Displayet i PUTTY opdateres ved at printe de nu nulstillede timer-værdier.
+
+//6.2: Serial read fra PUTTY --------------------------------------------------
+For at kunne skrive i PUTTY-terminalen konfigureres PUTTY således:
+  Terminal -> Line Discipline Options
+    -> Local echo: Force Off - Tillader at inputte i terminalen uden at operationer afbrydes.
+    -> Local Line Editing: Auto - Sender characters i terminalen ligeså snart de skrives.
+
+Når en character skrives i PUTTY, indlæses den i 'FIFO-bufferen'. Vi tager denne character, og placerer den i et array, hvor vi for hver indlæst character hæver indexet med én. På den måde opbygges en string i et character-array. Til sidst når brugeren har skrevet sin kommando, afsluttes med 'Enter'. Denne character kommer også med i arrayet med sin ASCII-kode. Når denne opdages, sendes en pointer til arrayet til en funktion, der sammenligner characters'ne i arrayet med nogle strings, som vi har defineret. Står der f.eks. 'Start' i arrayet, genkendes dette ved sammenligning, og vi kan kalde en funktion, i dette tilfælde at enable Timer2. Et 'Enter' resetter i øvrigt også index'et og rydder arrayet, ved at sætte en bit lig 0. På den måde kaldes en kommando kun én gang, og arrayet er klar til at indeholde en ny string-kommando efterfølgende.
+
+Characters trækkes ud af FIFO'en med funktionen uart-get-char().
+
+Slutteligt er skrevet en kort guide til hvorledes timeren bruges, som kaldes til at taste 'Help' i terminalen. Tekstfeltet i terminalen fungerer ved, at curseren hele tiden flyttes til en bestemt celle i terminalen, når ikke der printes andre steder. Derudover printes arrayet også kontinuerligt, så man kan se hvilke tegn man har indtastet. Kommandoen fjernes fra terminalen  når der trykkes 'Enter'.
