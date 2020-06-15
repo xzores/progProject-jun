@@ -83,9 +83,33 @@
 			<Add option="-eb_start_files" />
 			<Add option="-eb_lib=n" />
 		</Linker>
-		<Unit filename="..\..\Ex1\src\30010_io.c">
+		<Unit filename="..\..\Common\30010_io.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="..\..\Common\30010_io.h" />
+		<Unit filename="..\..\Common\ansi.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\Common\ansi.h" />
+		<Unit filename="..\..\Common\charset.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\Common\charset.h" />
+		<Unit filename="..\..\Common\GUI.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\Common\LUT.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\Common\LUT.h" />
+		<Unit filename="..\..\Common\Utility.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\Common\Utility.h" />
+		<Unit filename="..\..\Common\vector.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="..\..\Common\vector.h" />
 		<Unit filename="cmsis\arm_common_tables.h" />
 		<Unit filename="cmsis\arm_math.h" />
 		<Unit filename="cmsis\core_cm4.h" />
@@ -198,8 +222,8 @@
 		<Extensions>
 			<code_completion />
 			<debugger>
-				<target_debugging_settings target="Release" active_interface="ST-link">
-					<debug_interface interface_id="ST-link" ip_address="localhost" ip_port="4242" path="${EMBITZ}\share\contrib" executable="STLinkGDB.exe" description="" dont_start_server="false" backoff_time="1000" options="0" reg_filter="0" active_family="STMicroelectronics" gdb_before_conn="" gdb_after_conn="">
+				<target_debugging_settings target="Debug" active_interface="ST-link">
+					<debug_interface interface_id="ST-link" ip_address="localhost" ip_port="4242" path="C:\Users\Anders\Documents\DTU\30010 Programmeringsprojekt\Utilities\bin-x64" executable="openocd.exe" description="" dont_start_server="false" backoff_time="1000" options="0" reg_filter="0" active_family="STMicroelectronics" gdb_before_conn="" gdb_after_conn="">
 						<family_options family_id="STMicroelectronics">
 							<option opt_id="ID_JTAG_SWD" opt_value="swd" />
 							<option opt_id="ID_VECTOR_START" opt_value="0x08000000" />
@@ -215,8 +239,8 @@
 						</family_options>
 					</debug_interface>
 				</target_debugging_settings>
-				<target_debugging_settings target="Debug" active_interface="ST-link">
-					<debug_interface interface_id="ST-link" ip_address="localhost" ip_port="4242" path="C:\Users\Anders\Documents\DTU\30010 Programmeringsprojekt\Utilities\bin-x64" executable="openocd.exe" description="" dont_start_server="false" backoff_time="1000" options="0" reg_filter="0" active_family="STMicroelectronics" gdb_before_conn="" gdb_after_conn="">
+				<target_debugging_settings target="Release" active_interface="ST-link">
+					<debug_interface interface_id="ST-link" ip_address="localhost" ip_port="4242" path="${EMBITZ}\share\contrib" executable="STLinkGDB.exe" description="" dont_start_server="false" backoff_time="1000" options="0" reg_filter="0" active_family="STMicroelectronics" gdb_before_conn="" gdb_after_conn="">
 						<family_options family_id="STMicroelectronics">
 							<option opt_id="ID_JTAG_SWD" opt_value="swd" />
 							<option opt_id="ID_VECTOR_START" opt_value="0x08000000" />
