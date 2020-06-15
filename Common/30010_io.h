@@ -29,6 +29,7 @@ void lcd_push_buffer(uint8_t* buffer);
 void lcd_write_string(uint8_t* buf, const char* toPrint, uint8_t x, uint8_t y);
 void lcd_graphics_buffer(uint8_t* buf, uint16_t bufsize);
 void lcd_shift_right(uint8_t* buf, uint8_t* shiftBuf, int16_t offset);
+void lcd_graphics_buffer();
 void lcd_reset();
 void io_config();
 

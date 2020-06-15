@@ -1,0 +1,13 @@
+//Journal Mandag 080620 -------------------------------------------------------
+//Ex 3.1
+Vi har lavet en look-up table med det Excel-værktøj som er blevet stillet til rådighed. Fordelen ved en LUT er, at vi i stedet for at lave udregniner, kan slå værdierne op i stedet. Dette sparer computation, og giver dermed mening i udregningen af Sinus-værdier.
+
+//Ex 3.2
+Sinus værdierne udregnes og printes, ved at slå op i LUT'en på det index hvor vinklen findes. Her returneres et 2.14 format tal ( mySin() ), som konverteres om til 16.16 format ( expand() ). Dette tal kan bitmanipuleres, og der printes først heltallet, og dernæst decimaltallet, således at der printes i et format med ét ciffer heltal, og fire cifre decimaltal ( printFix() ).
+
+myCos() funktionen slår op i samme LUT, men tager værdien der ligger hvad der svarer til 90 grader længere fremme, ved at lægge 128 til index'et.
+
+Funktionerne er testet ved at printe deres værdier ud, og tjekke at de er korrekte med en lommeregner.
+
+//Ex 3.3
+Der er udviklet en funktion, multiply() der ganger to tal sammen. Funktionen bruger bit-manipulation, hvor heltal og decimaler splittes op, og bit-shiftes forskelligt. Slutteligt lægges heltal og decimaltal sammen, for at lave det samlede tal i 16.16 format. 
