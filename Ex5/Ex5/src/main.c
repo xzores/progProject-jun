@@ -13,6 +13,7 @@
 **********************************************************************/
 #include "stm32f30x_conf.h"
 #include "30010_io.h"
+#include "Utility.h"
 
 int main(void) {
     uart_init( 9600 );
