@@ -112,16 +112,16 @@ uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
 
 void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t sizeY) {
 
-    uint8_t i, j;
+    uint8_t i, j, t;
 
 
-    char toPrint[sizeX * 10 + 2]; // *10 ??
+    char toPrint[sizeX * sizeY *10 + 2]; // *10 ??
 
 
 
 
     for (j = y; j < y + sizeY; j++) {
-        uint8_t t = 0;
+        t = 0;
 
         for (i = x / 4; i < (x + sizeX) / 4 + 1; i++){
 
@@ -155,27 +155,81 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
     };
 }
 
+builds(struct Map * myMap) {
+    //Græs-lærred
+    buildMap(myMap, 0, 0, 255, 127, 'G');
+
+    //Major Roads
+    buildMap(myMap, 0, 0, 255, 4, 'R'); // Anker Engelundsvej
+    buildMap(myMap, 0, 4, 6, 118, 'R'); // Lundtoftevej
+    buildMap(myMap, 0, 123, 255, 4, 'R'); // Akademivej
+    buildMap(myMap, 252, 4, 4, 121, 'R'); // Lundtoftegårdvej
+    buildMap(myMap, 150, 4, 4, 120, 'R'); // Asmussens Allé
+    buildMap(myMap, 165, 4, 4, 120, 'R'); //Niels Koppels Allé
+    buildMap(myMap, 219, 4, 4, 120, 'R'); // Kollegiebakken
+    buildMap(myMap, 95, 64, 55, 3, 'R'); // Elektrovej
+    buildMap(myMap, 6, 79, 100, 3, 'R'); // ELV2
+    buildMap(myMap, 21, 66, 3, 13, 'R'); // ELV3
+    buildMap(myMap, 21, 64, 34, 3, 'R'); // ELV4
+
+    //Minor Roads
+    buildMap(myMap, 6, 38, 44, 3, 'R'); // Fysikvej
+    buildMap(myMap, 46, 19, 4, 19, 'R'); // FV2
+    buildMap(myMap, 18, 93, 3, 29, 'R'); //Diplomvej
+    buildMap(myMap, 21, 93, 9, 2, 'R'); // DPV2
+    buildMap(myMap, 30, 82, 3, 13, 'R'); // DPV3
+    buildMap(myMap, 49, 87, 3, 35, 'R'); // Centrifugevej
+    buildMap(myMap, 64, 98, 4, 24, 'R'); // Akustikvej
+
+
+
+    // Torve og parkeringspladser
+    buildMap(myMap, 43, 89, 18, 33, 'R'); // Ørsted plads
+    buildMap(myMap, 95, 29, 30, 22, 'R'); // Matematiktorvet
+    buildMap(myMap, 125, 29, 7, 1, 'R'); // Mtorv2
+    buildMap(myMap, 132, 27, 18, 3, 'R'); //Mtorv2
+
+
+
+    //Stier
+    buildMap(myMap, 95, 51, 2, 13, 'R'); // sti 1
+    buildMap(myMap, 47, 66, 1, 13, 'R'); // sti 5
+    buildMap(myMap, 106, 81, 44, 1, 'R'); // Sti 6
+
+
+
+
+
+
+
+
+
+    /*buildMap(myMap, 0, 0, 5, 10, 'G');
+    buildMap(myMap, 5, 0, 4, 10, 'R');
+    buildMap(myMap, 9, 0, 10, 10, 'G');
+    buildMap(myMap, 10, 1, 8, 8, 'W'); */
+}
+
 
 
 int main(void)
 {
     srand(10321);
 
-    uart_init(9600);
+    uart_init(115200);
     homeCurser(); //Sæt curser til 0,0
     clearTermninal(); // Ryd terminal
     //struct Map myMap = {malloc(50 * 50 * sizeof(uint8_t)), 50, {{0xB0,0xB0,0xB0},  {0xDB,0xDB,0xDB}, {0xB3,0xDD,0xEF}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}};
-    struct Map myMap = {malloc(50 * 50 * sizeof(uint8_t)), 50, {{0xDB,0xDB,0xDB},  {0xB2,0xB2,0xB2}, {0xF7,0xF7,0xF7}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
-    memset(myMap.buffer, 0x00, 50 * 50);
-    buildMap(&myMap, 0, 0, 5, 10, 'G');
-    buildMap(&myMap, 5, 0, 4, 10, 'R');
-    buildMap(&myMap, 9, 0, 10, 10, 'G');
-    buildMap(&myMap, 10, 1, 8, 8, 'W');
+    struct Map myMap = {calloc(254, sizeof(uint8_t)), 50, {{0xDB,0xDB,0xDB},  {0xB2,0xB2,0xB2}, {0xF7,0xF7,0xF7}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
+    //memset(myMap.buffer, 0x00, 128 * 256);
+
+    builds(&myMap);
+
 
 
     while(1)
     {
-        printSubMap(&myMap, 0,0, 20,10);
+        printSubMap(&myMap, 93,62, 40,27);
         gotoxy(0,0);
     };
 }
