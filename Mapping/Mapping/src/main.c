@@ -107,9 +107,6 @@ uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
     }
 
 
-
-
-
 void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t sizeY) {
 
     uint8_t i, j, t;
