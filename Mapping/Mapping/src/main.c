@@ -107,9 +107,6 @@ uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
     }
 
 
-
-
-
 void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t sizeY) {
 
     uint8_t i, j;
@@ -161,7 +158,7 @@ int main(void)
 {
     srand(10321);
 
-    uart_init(9600);
+    uart_init(115200);
     homeCurser(); //Sæt curser til 0,0
     clearTermninal(); // Ryd terminal
     //struct Map myMap = {malloc(50 * 50 * sizeof(uint8_t)), 50, {{0xB0,0xB0,0xB0},  {0xDB,0xDB,0xDB}, {0xB3,0xDD,0xEF}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}};
