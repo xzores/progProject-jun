@@ -627,7 +627,7 @@
 	"ansi.h"
 	"Utility.h"
 
-1592212131 c:\users\fu18owz\documents\github\progproject-jun\common\30010_io.h
+1592225361 c:\users\fu18owz\documents\github\progproject-jun\common\30010_io.h
 	"stm32f30x_conf.h"
 	<stdio.h>
 
@@ -635,7 +635,7 @@
 	<stdint.h>
 	<stdio.h>
 
-1591973410 c:\users\fu18owz\documents\github\progproject-jun\common\utility.h
+1592569802 c:\users\fu18owz\documents\github\progproject-jun\common\utility.h
 	"stm32f30x_conf.h"
 	"30010_io.h"
 
@@ -643,4 +643,31 @@
 
 1591971274 source:c:\users\fu18owz\documents\github\progproject-jun\ex1\src\system_stm32f30x.c
 	"stm32f30x.h"
+
+1591973542 source:c:\users\fu18owz\documents\github\progproject-jun\common\30010_io.c
+	"30010_io.h"
+	"charset.h"
+	<string.h>
+
+1591971273 c:\users\fu18owz\documents\github\progproject-jun\common\charset.h
+
+1591971849 source:c:\users\fu18owz\documents\github\progproject-jun\common\ansi.c
+	"ansi.h"
+
+1591971273 source:c:\users\fu18owz\documents\github\progproject-jun\common\gui.c
+
+1591971273 source:c:\users\fu18owz\documents\github\progproject-jun\common\lut.c
+	"LUT.h"
+
+1591971273 c:\users\fu18owz\documents\github\progproject-jun\common\lut.h
+
+1591972454 source:c:\users\fu18owz\documents\github\progproject-jun\common\vector.c
+	"LUT.h"
+	"vector.h"
+
+1591971273 c:\users\fu18owz\documents\github\progproject-jun\common\vector.h
+	"30010_io.h"
+
+1592225361 source:c:\users\fu18owz\documents\github\progproject-jun\common\utility.c
+	"Utility.h"
 
