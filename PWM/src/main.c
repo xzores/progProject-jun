@@ -12,12 +12,13 @@
 
 **********************************************************************/
 #include "stm32f30x_conf.h"
+#include "stm32f30x.h"
 #include "30010_io.h"
 #include "utility.h"
 
 
 
-/*void configT15()
+void configT15()
 {
     RCC->APB2ENR |= RCC_APB2Periph_TIM15; // Enable clock line to timer 2;
     TIM15->CR1 = 0x0000;
@@ -30,7 +31,7 @@
 
     TIM15->CR1 |= 0x0001; // Enable timer
 
-}*/
+}
 
 void configT2()
 {
@@ -63,12 +64,10 @@ void setFreq(uint32_t freq) {
         TIM2->CCR3 = reload/2; // Set compare register
 
         TIM2->EGR |= 0x01;
-        //HAL_Delay(1);
+
     }
 
 }
-
-
 
 int main(void)
 {
@@ -80,7 +79,7 @@ int main(void)
     configT2();
     configCount();
 
-    setFreq(20);
+    setFreq(100);
 
 
   while(1)
