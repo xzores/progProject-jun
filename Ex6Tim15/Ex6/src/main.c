@@ -110,16 +110,7 @@ void resetTimer(struct time timer) {
 
 int main(void) {
 
-    RCC->APB2ENR |= RCC_APB2ENR_TIM15EN; // Enable clock line to timer 2;
-    TIM15->CR1 = 0x0000; // Disable timer
-    TIM15->ARR = 250; // Set auto reload value
-    TIM15->PSC = 2; // Set pre-scaler value
-
-    TIM15->DIER |= 0x0001; // Enable timer 2 interrupts
-
-
-    TIM15->CR1 |= 0x0001; // Enable timer
-
+    TIM15->CR1 = 0x0;
 
     while(1){};
 

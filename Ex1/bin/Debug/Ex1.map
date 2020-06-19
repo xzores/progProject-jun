@@ -376,7 +376,7 @@ Discarded input sections
  .debug_aranges
                 0x00000000       0x68 obj\debug\~#\common\utility.o
  .debug_ranges  0x00000000       0x58 obj\debug\~#\common\utility.o
- .debug_macro   0x00000000      0x2ed obj\debug\~#\common\utility.o
+ .debug_macro   0x00000000      0x2e7 obj\debug\~#\common\utility.o
  .debug_macro   0x00000000      0x892 obj\debug\~#\common\utility.o
  .debug_macro   0x00000000       0x74 obj\debug\~#\common\utility.o
  .debug_macro   0x00000000       0x35 obj\debug\~#\common\utility.o
@@ -437,7 +437,7 @@ Discarded input sections
  .debug_macro   0x00000000      0x189 obj\debug\~#\common\utility.o
  .debug_macro   0x00000000       0x5e obj\debug\~#\common\utility.o
  .debug_line    0x00000000      0x61b obj\debug\~#\common\utility.o
- .debug_str     0x00000000    0x56685 obj\debug\~#\common\utility.o
+ .debug_str     0x00000000    0x56671 obj\debug\~#\common\utility.o
  .comment       0x00000000       0x6f obj\debug\~#\common\utility.o
  .debug_frame   0x00000000      0x194 obj\debug\~#\common\utility.o
  .ARM.attributes
@@ -4650,7 +4650,7 @@ OUTPUT(bin\Debug\Ex1.elf elf32-littlearm)
  .debug_ranges  0x000003d8       0x10 obj\debug\src\main.o
  .debug_ranges  0x000003e8       0x20 obj\debug\src\system_stm32f30x.o
 
-.debug_macro    0x00000000     0xe891
+.debug_macro    0x00000000     0xe88b
  .debug_macro   0x00000000      0x30d obj\debug\~#\common\30010_io.o
  .debug_macro   0x0000030d      0x892 obj\debug\~#\common\30010_io.o
  .debug_macro   0x00000b9f       0x74 obj\debug\~#\common\30010_io.o
@@ -4717,8 +4717,8 @@ OUTPUT(bin\Debug\Ex1.elf elf32-littlearm)
  .debug_macro   0x0000d92e      0x5c0 obj\debug\spl\src\stm32f30x_rcc.o
  .debug_macro   0x0000deee      0x1b3 obj\debug\spl\src\stm32f30x_usart.o
  .debug_macro   0x0000e0a1      0x35e obj\debug\spl\src\stm32f30x_usart.o
- .debug_macro   0x0000e3ff      0x2fb obj\debug\src\main.o
- .debug_macro   0x0000e6fa      0x197 obj\debug\src\system_stm32f30x.o
+ .debug_macro   0x0000e3ff      0x2f5 obj\debug\src\main.o
+ .debug_macro   0x0000e6f4      0x197 obj\debug\src\system_stm32f30x.o
 
 .debug_line     0x00000000     0x279d
  .debug_line    0x00000000      0x7ed obj\debug\~#\common\30010_io.o
@@ -4729,7 +4729,7 @@ OUTPUT(bin\Debug\Ex1.elf elf32-littlearm)
  .debug_line    0x0000224f       0xbb obj\debug\src\startup_stm32f30x.o
  .debug_line    0x0000230a      0x493 obj\debug\src\system_stm32f30x.o
 
-.debug_str      0x00000000    0x57d2d
+.debug_str      0x00000000    0x57d19
  .debug_str     0x00000000    0x568a9 obj\debug\~#\common\30010_io.o
                               0x56b02 (size before relaxing)
  .debug_str     0x000568a9      0x152 obj\debug\~#\common\ansi.o
@@ -4738,9 +4738,9 @@ OUTPUT(bin\Debug\Ex1.elf elf32-littlearm)
                               0x52dca (size before relaxing)
  .debug_str     0x00057334      0x7b2 obj\debug\spl\src\stm32f30x_usart.o
                               0x52c9e (size before relaxing)
- .debug_str     0x00057ae6      0x167 obj\debug\src\main.o
-                              0x55fa1 (size before relaxing)
- .debug_str     0x00057c4d       0xe0 obj\debug\src\system_stm32f30x.o
+ .debug_str     0x00057ae6      0x153 obj\debug\src\main.o
+                              0x55f8d (size before relaxing)
+ .debug_str     0x00057c39       0xe0 obj\debug\src\system_stm32f30x.o
                               0x5245c (size before relaxing)
 
 .debug_frame    0x00000000     0x1bc8

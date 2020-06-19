@@ -14,7 +14,7 @@
 #include "stm32f30x_conf.h"
 #include "stm32f30x.h"
 #include "30010_io.h"
-#include "Utility.h"
+#include "utility.h"
 
 
 
@@ -31,10 +31,6 @@ void configT15()
 
     TIM15->CR1 |= 0x0001; // Enable timer
 
-}
-
-void TIM1_BRK_TIM15_IRQHandler (void){
-    setFreq(1000);
 }
 
 void configT2()
@@ -80,9 +76,6 @@ int main(void)
     GPIOB->MODER &= ~(0x00000003 << (10 * 2)); // Clear mode register
     GPIOB->MODER |= (0x00000002 << (10 * 2)); // Set mode register
     GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_1);
-
-    //setupTimer(TIM2, RCC_APB1ENR_TIM2EN, 1000, 4);
-    configT15();
     configT2();
     configCount();
 
