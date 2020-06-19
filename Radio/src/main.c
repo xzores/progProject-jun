@@ -32,9 +32,8 @@ uint8_t nindex = 0;
 
 void TIM1_BRK_TIM15_IRQnHandle(void){
     uint32_t t = notes[nindex % 6];
-    setFreq(TIM2, t);
+    setFreq(TIM2, 50);
     nindex++;
-    TIM15->SR &= ~0x0001; //Clear interrupt bit
 }
 
 /*
@@ -90,7 +89,21 @@ int main(void)
     GPIOB->MODER |= (0x00000002 << (10 * 2)); // Set mode register
     GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_1);
 
-    configT15();
+    //TIMER 15 for sound interrupts
+    //setupTimer(TIM15, RCC_APB2Periph_TIM15, 25599, 0x9C3);
+
+    RCC->APB2ENR |= RCC_APB2Periph_TIM15; // Enable clock line to timer 2;
+    TIM15->CR1 = 0x0000;
+    TIM15->ARR = 25599; // Set auto reload value
+    TIM15->PSC = 0x9C3; // Set pre-scaler value
+    TIM15->DIER |= 0x0001; // Enable timer interrupt
+    NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 0);
+    NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn);
+    TIM15->CR1 |= 0x0001; // Enable timer
+
+
+    setupTimerInterupts(TIM15, TIM1_BRK_TIM15_IRQn, 2);
+    //configCount(TIM15);
 
     //timer  2 for PWM
     setupTimer(TIM2, RCC_APB1Periph_TIM2, 63999, 9);

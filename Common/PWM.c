@@ -7,10 +7,14 @@ void configT15()
     TIM15->ARR = 63999; // Set auto reload value
     TIM15->PSC = 9; // Set pre-scaler value
     TIM15->DIER |= 0x0001; // Enable timer interrupt
+
     NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 0);
     NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn);
+
     TIM15->CR1 |= 0x0001; // Enable timer
+
 }
+
 void configCount(TIM_TypeDef* TIM)
 {
     TIM->CCER &= ~TIM_CCER_CC3P; // Clear CCER register
