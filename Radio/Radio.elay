@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <EmBitz_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="..\Common\30010_io.c" open="1" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="..\Common\30010_io.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="0" topLine="0" />
+			<Cursor1 position="64" topLine="286" />
 		</Cursor>
 	</File>
-	<File name="..\Common\PWM.c" open="1" top="1" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="..\Common\PWM.c" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1906" topLine="56" />
+			<Cursor1 position="18" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="..\Common\PWM.h" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="..\Common\PWM.h" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="361" topLine="0" />
+			<Cursor1 position="329" topLine="0" />
 		</Cursor>
 	</File>
 	<File name="..\Common\Utility.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -21,14 +21,14 @@
 			<Cursor1 position="1221" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="src\main.c" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src\main.c" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1687" topLine="23" />
+			<Cursor1 position="2319" topLine="65" />
 		</Cursor>
 	</File>
 	<File name="src\startup_stm32f30x.S" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3768" topLine="109" />
+			<Cursor1 position="3768" topLine="158" />
 		</Cursor>
 	</File>
 </EmBitz_layout_file>

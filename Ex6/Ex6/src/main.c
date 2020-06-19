@@ -77,7 +77,7 @@ int compare_string(char *first, char *second)
       return -1;
 }
 
-void TIM2_IRQHandler(void) {
+void TIM1_BRK_TIM15_IRQnHandle(void) {
     timer.h++;
     if (timer.h >= 100) {
         timer.h = 0;
@@ -95,7 +95,7 @@ void TIM2_IRQHandler(void) {
         timer.H++;
     }
 
-    TIM2->SR &= ~0x0001; //Clear interrupt bit
+    TIM15->SR &= ~0x0001; //Clear interrupt bit
 }
 
 
@@ -144,14 +144,14 @@ int main(void) {
 
 
     //Opsætning af timer---------------------------
-    RCC->APB1ENR |= RCC_APB1Periph_TIM2; //Enable Clockline to timer 2.
-    TIM2->CR1 = 0x01; //Timer enabled, all other bits disabled
-    TIM2->ARR = 0xFF; //Reload value sat til 256-1.
-    TIM2->PSC = 0x9C3; //Prescale sat til 2500-1 (maximum) (-1 pga formel)
+    RCC->APB2ENR |= RCC_APB2Periph_TIM15; //Enable Clockline to timer 2.
+    TIM15->CR1 = 0x01; //Timer enabled, all other bits disabled
+    TIM15->ARR = 0xFF; //Reload value sat til 256-1.
+    TIM15->PSC = 0x9C3; //Prescale sat til 2500-1 (maximum) (-1 pga formel)
     //Interrupts------------------------
-    TIM2->DIER |= 0x0001; //Enable Timer 2 Interrupts
-    NVIC_SetPriority(TIM2_IRQn, 0x0); //Set Interrupt Priority
-    NVIC_EnableIRQ(TIM2_IRQn); //Enable interrupt
+    TIM15->DIER |= 0x0001; //Enable Timer 2 Interrupts
+    NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 0x0); //Set Interrupt Priority
+    NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn); //Enable interrupt
 
     uint8_t joy = 0; //Joystick edge-detection
     uint16_t readBytes = 0;
@@ -193,7 +193,7 @@ int main(void) {
     if (joy != readJoystick()) {
         joy = readJoystick();
         if (joy == 0x10) {
-            TIM2->CR1 = !TIM2->CR1;
+            TIM15->CR1 = !TIM15->CR1;
             }
         else if (joy == 0x04) {// joy readBytesleft: Split 1
             gotoxy(22,6);
@@ -208,8 +208,8 @@ int main(void) {
         }
 
         else if (joy == 0x02) { //Joy-Down: stop og reset
-            TIM2->CR1 = 0x00; //Sluk timer
-            TIM2->CNT = 0x00; //reset counter til 0.
+            TIM15->CR1 = 0x00; //Sluk timer
+            TIM15->CNT = 0x00; //reset counter til 0.
             resetTimer(timer);
 
             gotoxy(0,2);
@@ -237,10 +237,10 @@ int main(void) {
         uint8_t didSomething = 1;
 
         if(!strcmp(array_p, "Start") && readBytes == 0){
-            TIM2->CR1 = 0x01; //timer enable
+            TIM15->CR1 = 0x01; //timer enable
             }
         else if (!strcmp(array_p, "Stop") && readBytes == 0) {
-            TIM2->CR1 = 0x00; //Timer disable
+            TIM15->CR1 = 0x00; //Timer disable
         }
         else if (!strcmp(array_p, "Split1") && readBytes == 0) {
             gotoxy(22,6);
@@ -252,8 +252,8 @@ int main(void) {
             printf("%d.%d.%d.%d", timer.H, timer.m, timer.s,timer.h);
         }
         else if (!strcmp(array_p, "Reset") && readBytes == 0) {
-            TIM2->CR1 = 0x00; //Sluk timer
-            TIM2->CNT = 0x00; //reset counter til 0.
+            TIM15->CR1 = 0x00; //Sluk timer
+            TIM15->CNT = 0x00; //reset counter til 0.
             resetTimer(timer);
 
             gotoxy(0,2);
