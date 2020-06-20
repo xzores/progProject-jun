@@ -156,7 +156,7 @@ Reset_Handler:
  *      __data_start__/__data_end__: RAM address range that data should be
  *      copied to. Both must be aligned to 4 bytes boundary.  */
 
-    ldr    r1, =__etext
+for(freq=20; freq<=800 ;freq++){    ldr    r1, =__etext
     ldr    r2, =__data_start__
     ldr    r3, =__data_end__
 

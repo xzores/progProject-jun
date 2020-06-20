@@ -1,5 +1,3 @@
-#ifndef UTILITY_H_INCLUDED
-#define UTILITY_H_INCLUDED
 
 #include "stm32f30x_conf.h"
 #include "30010_io.h"
@@ -43,6 +41,3 @@ void setLED(uint8_t color);
 uint8_t readJoystick();
 void setupTimer(TIM_TypeDef* TIM, uint32_t RCC_APBPeriph, uint16_t reloadValue, uint16_t prescale);
 void setupTimerInterupts(TIM_TypeDef* TIM, uint8_t TIM_IRQn,  uint8_t priority);
-
-
-#endif
