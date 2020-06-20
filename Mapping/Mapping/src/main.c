@@ -20,7 +20,6 @@
 struct Map{
 
     uint8_t* buffer;
-    char* renderBuffer;
     uint16_t mySize;
     char style[4][3];
     uint8_t colors[4], posX, posY;
@@ -217,12 +216,12 @@ void printSubMap(struct Map* myMap, struct Player* player, uint8_t x, uint8_t y,
 }
 
 
-builds(struct Map * myMap) {
+void builds(struct Map * myMap) {
     //Gr�s-l�rred
     buildMap(myMap, 0, 0, 255, 127, 'G');
 
     //Major Roads
-    buildMap(myMap, 0, 0, 255, 4, 'R'); // Anker Engelundsvej
+/*    buildMap(myMap, 0, 0, 255, 4, 'R'); // Anker Engelundsvej
     buildMap(myMap, 0, 4, 6, 118, 'R'); // Lundtoftevej
     buildMap(myMap, 0, 123, 255, 4, 'R'); // Akademivej
     buildMap(myMap, 252, 4, 4, 121, 'R'); // Lundtofteg�rdvej
@@ -233,7 +232,7 @@ builds(struct Map * myMap) {
     buildMap(myMap, 6, 79, 100, 3, 'R'); // ELV2
     buildMap(myMap, 21, 66, 3, 13, 'R'); // ELV3
     buildMap(myMap, 21, 64, 34, 3, 'R'); // ELV4
-/*
+
     //Minor Roads
     buildMap(myMap, 6, 38, 44, 3, 'R'); // Fysikvej
     buildMap(myMap, 46, 19, 4, 19, 'R'); // FV2
@@ -276,7 +275,8 @@ builds(struct Map * myMap) {
     buildMap(myMap, 169,27, 50, 1, 'R'); // Sti 4
 
     //Bygninger/Walls Sektor 1m->
-   */ buildMap(myMap, 29, 12, 41, 6, 'W'); // B309
+   */
+   /*buildMap(myMap, 29, 12, 41, 6, 'W'); // B309
     buildMap(myMap, 78, 9, 68, 14, 'W'); //B303
     buildMap(myMap, 78, 22, 11, 11, 'W'); //B306
     buildMap(myMap, 126, 31, 22, 6, 'W'); //B304
@@ -289,7 +289,7 @@ builds(struct Map * myMap) {
     buildMap(myMap, 48, 56, 45, 6, 'W'); //B325
     buildMap(myMap, 59, 62, 2, 5, 'W'); // SPace 2
     buildMap(myMap, 49, 67, 19, 6, 'W'); // DTU Space
-
+        */
     //Sektor 2
 /* buildMap(myMap, 8, 83, 20, 3, 'W'); // Science Park
     buildMap(myMap, 8, 88, 8, 2, 'W'); // SP2
@@ -350,12 +350,6 @@ int main(void)
 
     myMap.posX = 33;
     myMap.posY = 33;
-
-
-
-
-
-
 
     //builds(&myMap, posX, posY,);
 
