@@ -386,7 +386,7 @@
 1592468929 source:c:\users\guest\documents\github\progproject-jun\common\utility.c
 	"Utility.h"
 
-1592468929 c:\users\guest\documents\github\progproject-jun\common\utility.h
+1592472874 c:\users\guest\documents\github\progproject-jun\common\utility.h
 	"stm32f30x_conf.h"
 	"30010_io.h"
 
@@ -474,11 +474,12 @@
 	"stm32f30x_wwdg.h"
 	"stm32f30x_rcc.h"
 
-1592471430 source:c:\users\guest\documents\github\progproject-jun\mapping\mapping\src\main.c
+1592493277 source:c:\users\guest\documents\github\progproject-jun\mapping\mapping\src\main.c
 	"stm32f30x_conf.h"
 	<stdlib.h>
 	"30010_io.h"
 	"Utility.h"
+	<string.h>
 
 1592471430 source:c:\users\guest\documents\github\progproject-jun\mapping\mapping\src\startup_stm32f30x.s
 

@@ -21,6 +21,9 @@
 #define GREEN_LED GPIOC, 7
 #define RED_LED GPIOB, 4
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 //self explanatory
 inline int32_t power(int32_t a, int32_t exp) {
 // calculates a^exp
@@ -35,6 +38,6 @@ void setPortPuPd(GPIO_TypeDef * GPIO, char pin, uint8_t pupd);
 uint8_t readPortPin(GPIO_TypeDef * GPIO, char pin);
 void setPin(GPIO_TypeDef * GPIO, char pin, uint8_t val);
 void setLED(uint8_t color);
-uint8_t readJoystick(); 
+uint8_t readJoystick();
 void setupTimer(TIM_TypeDef* TIM, uint32_t RCC_APBPeriph, uint16_t reloadValue, uint16_t prescale);
 void setupTimerInterupts(TIM_TypeDef* TIM, uint8_t TIM_IRQn,  uint8_t priority);
