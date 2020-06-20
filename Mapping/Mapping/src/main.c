@@ -416,10 +416,6 @@ int main(void)
         gotoxy(0,0);
         printf(myMap.renderBuffer);
 
-        int i = 0;
-        for(i = 0; i < 10000; i++){
-            a = i + i;
-        }
 
         gotoxy(0,0);
         myMap.posX++;
