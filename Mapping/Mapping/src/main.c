@@ -163,16 +163,26 @@ uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
 }
 
 
+
 void printSubMap(struct Map* myMap, struct Player* player, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t sizeY) {
 
-    uint8_t i, j, t;
+    uint8_t i, j;
+    uint32_t m = 0;
+    uint8_t lastTile = -1; //ye, this is legal
+
+    char toPrint[sizeX * 30 + 2]; // *10 ??
+
+
+    for (j = y; j < y + sizeY; j++) {
+        uint16_t t = 0;
+        uint8_t xin = x;
 
         for (i = x ; i < x + sizeX; i++){
 
-    char toPrint[sizeX * sizeY *10 + 2]; // *10 ??
+            uint8_t data = myMap->buffer[j * myMap->mySize + i / 4];
 
-    for (j = y; j < y + sizeY; j++) {
-        t = 0;
+            uint8_t s = ((i % 3) * 2);
+            uint8_t d = (data & (3 << s)) >> s;
 
             srand(i + j);
 
@@ -205,6 +215,7 @@ void printSubMap(struct Map* myMap, struct Player* player, uint8_t x, uint8_t y,
 
     myMap->renderBuffer[m + 1] = '\0';
 }
+
 
 builds(struct Map * myMap) {
     //Gr�s-l�rred
