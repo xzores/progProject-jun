@@ -32,9 +32,9 @@ void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, i
 
         *enableBuild = 1; //Der skrives til array hvis et if-statement aktiveres
 
-        if ((pos - b) < (Size / 2)) { //Boks starter i 2. eller 3. kvadrant
-            *s = (Size / 2) - pos - b;
-                if ((pos + (Size / 2) - b) > bSize) { //Hvis resten af vinduet er l�ngere end boksen
+        if ((pos - b) <= (Size / 2) && (pos - b) > 0) { //Boks starter i 2. eller 3. kvadrant
+            *s = (Size / 2) - (pos - b);
+                if ((pos + (Size / 2) - b) >= bSize) { //Hvis resten af vinduet er l�ngere end boksen
                     *z = bSize;
                     } else {
                     *z = pos + (Size / 2) - b; //Hvis boksen g�r ud over vinduet
@@ -42,10 +42,10 @@ void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, i
 
         }
 
-        if (b > pos) { // Boksen starter i 1. eller 4. kvadrant
+        if (b >= pos) { // Boksen starter i 1. eller 4. kvadrant
 
             *s = (Size / 2) + b - pos;
-                if ((Size / 2) - (b - pos) > bSize) {//Hvis resten af vinduet er l�ngere end boksen
+                if ((Size / 2) - (b - pos) >= bSize) {//Hvis resten af vinduet er l�ngere end boksen
                     *z = bSize;
                 } else {
                     *z = (Size / 2) - (b - pos); //Hvis boksen g�r ud over vinduet
@@ -56,9 +56,9 @@ void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, i
             *z = bSize - (pos - (Size / 2) - b);
         }
     }
-
+    /*
     *s = MAX(0, MIN(Size - 1, *s));
-    *z = MAX(0, MIN(Size - 1, *z));
+    *z = MAX(0, MIN(Size - 1, *z)); */
 }
 
 struct Player{
@@ -73,7 +73,7 @@ struct Player{
 void buildMap(struct Map* myMap, uint16_t bx, uint16_t by, uint16_t sizeX, uint16_t sizeY, char style) {
 
     uint16_t i, j;
-    uint8_t type, enableBuild = 0;
+    uint8_t type, enableBuildX = 0, enableBuildY = 0;
 
     if (style == 'R') {
         type = 0;
@@ -88,11 +88,11 @@ void buildMap(struct Map* myMap, uint16_t bx, uint16_t by, uint16_t sizeX, uint1
     int16_t xs, ys, xz, yz;
 
     //X-akse
-    calcAkse(myMap->posX, myMap->mySize, sizeX, bx, &xs, &xz, &enableBuild);
+    calcAkse(myMap->posX, myMap->mySize, sizeX, bx, &xs, &xz, &enableBuildX);
 
-    calcAkse(myMap->posY, myMap->mySize, sizeY, by, &ys, &yz, &enableBuild);
+    calcAkse(myMap->posY, myMap->mySize, sizeY, by, &ys, &yz, &enableBuildY);
 
-    if (enableBuild) {
+    if (enableBuildX && enableBuildY) { //Der skrives til buffer, hvis figuren på begge akser ligger inden for radius
         for (i = xs; i < xs + xz; i++) {
             for (j = ys; j < ys + yz; j++) {
                 uint8_t shiftIndex = (i % 4) * 2;
@@ -163,57 +163,48 @@ uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
 
 
 
-void printSubMap(struct Map* myMap, struct Player* player, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t sizeY) {
+void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t sizeY) {
 
-    uint8_t i, j;
-    uint32_t m = 0;
-    uint8_t lastTile = -1; //ye, this is legal
-
-    char toPrint[sizeX * 30 + 2]; // *10 ??
+    uint8_t i, j, t;
 
 
-    for (j = y; j < y + sizeY; j++) {
-        uint16_t t = 0;
-        uint8_t xin = x;
+    char toPrint[sizeX * sizeY * 10 + 2]; // *10 ??
 
-        for (i = x ; i < x + sizeX; i++){
+    for (j = 0; j < myMap->mySize; j++) {
+        t = 0;
 
-            uint8_t data = myMap->buffer[j * myMap->mySize + i / 4];
+        for (i = 0; i < myMap->mySize / 4; i++){
 
-            uint8_t s = ((i % 3) * 2);
-            uint8_t d = (data & (3 << s)) >> s;
+            uint8_t data = myMap->buffer[j * myMap->mySize + i];
 
-            srand(i + j);
+            uint8_t d1, d2, d3, d4;
+            d1 = (data & (3 << 0)) >> 0;
+            d2 = (data & (3 << 2)) >> 2;
+            d3 = (data & (3 << 4)) >> 4;
+            d4 = (data & (3 << 6)) >> 6;
 
             uint8_t r = rand() % 3;
 
-            //print the tile, optimazation, dont print new escape char if they are allready there
-            if (d != lastTile){
-                t = tileScheme(toPrint, t, d);
-                lastTile = d;
-            }
-
-            //print tile or player
-            if(j == player->y && xin == player->x){
-                //print the player
-                toPrint[t++] = player->look;
-            }
-            else{
-                toPrint[t++] = myMap->style[d][r];
-            }
-
-            xin++;
-
+            t = tileScheme(&toPrint, t, d1); //ESC-codes tilføjes til toPrint, t opdateres
+            toPrint[t++] = myMap->style[d1][r];
+            if (d2 != d1)
+            t = tileScheme(&toPrint, t, d2);
+            toPrint[t++] = myMap->style[d2][r];
+            if (d3 != d2)
+            t = tileScheme(&toPrint, t, d3);
+            toPrint[t++] = myMap->style[d3][r];
+            if (d4 != d3)
+            t = tileScheme(&toPrint, t, d4);
+            toPrint[t++] = myMap->style[d4][r];
         }
 
         toPrint[t++] = '\n';
+        toPrint[t++] = '\0';
 
-        memcpy(&(myMap->renderBuffer[m]), toPrint, t);
-        m += t;
+        printf(toPrint);
     };
-
-    myMap->renderBuffer[m + 1] = '\0';
 }
+
 
 
 void builds(struct Map * myMap) {
@@ -221,7 +212,7 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 0, 0, 255, 127, 'G');
 
     //Major Roads
-/*    buildMap(myMap, 0, 0, 255, 4, 'R'); // Anker Engelundsvej
+    buildMap(myMap, 0, 0, 255, 4, 'R'); // Anker Engelundsvej
     buildMap(myMap, 0, 4, 6, 118, 'R'); // Lundtoftevej
     buildMap(myMap, 0, 123, 255, 4, 'R'); // Akademivej
     buildMap(myMap, 252, 4, 4, 121, 'R'); // Lundtofteg�rdvej
@@ -239,7 +230,8 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 18, 93, 3, 29, 'R'); //Diplomvej
     buildMap(myMap, 21, 93, 9, 2, 'R'); // DPV2
     buildMap(myMap, 30, 82, 3, 13, 'R'); // DPV3
-    buildMap(myMap, 49, 87, 3, 35, 'R'); // Centrifugevej
+    buildMap(myMap, 49, 87, 3, 35, 'R'); // Centrifugevejint main(void)
+
     buildMap(myMap, 64, 98, 4, 24, 'R'); // Akustikvej
     buildMap(myMap, 200, 42, 11, 36, 'R'); // Energivej
     buildMap(myMap, 205, 42, 14, 34, 'R'); // EV2
@@ -275,8 +267,8 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 169,27, 50, 1, 'R'); // Sti 4
 
     //Bygninger/Walls Sektor 1m->
-   */
-   /*buildMap(myMap, 29, 12, 41, 6, 'W'); // B309
+
+   buildMap(myMap, 29, 12, 41, 6, 'W'); // B309
     buildMap(myMap, 78, 9, 68, 14, 'W'); //B303
     buildMap(myMap, 78, 22, 11, 11, 'W'); //B306
     buildMap(myMap, 126, 31, 22, 6, 'W'); //B304
@@ -289,9 +281,9 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 48, 56, 45, 6, 'W'); //B325
     buildMap(myMap, 59, 62, 2, 5, 'W'); // SPace 2
     buildMap(myMap, 49, 67, 19, 6, 'W'); // DTU Space
-        */
+
     //Sektor 2
-/* buildMap(myMap, 8, 83, 20, 3, 'W'); // Science Park
+    buildMap(myMap, 8, 83, 20, 3, 'W'); // Science Park
     buildMap(myMap, 8, 88, 8, 2, 'W'); // SP2
     buildMap(myMap, 8, 91, 8, 4, 'W'); // SP3
     buildMap(myMap, 17, 86, 5, 6, 'W'); // SP4
@@ -313,7 +305,7 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 116, 88, 2, 14, 'W'); // F2
     buildMap(myMap, 116, 102, 32, 8, 'W'); // F3
     buildMap(myMap, 116, 111, 32, 10, 'W'); //
-*/
+
 
 
 
@@ -335,84 +327,39 @@ static uint8_t mem[100*100];
 
 int main(void)
 {
+    srand(10321);
 
     uart_init(115200);
-    homeCurser(); //S�t curser til 0,0
+    homeCurser(); //Sæt curser til 0,0
     clearTermninal(); // Ryd terminal
-
-    struct Player player = {10, 10, 'P', 10};
-
     //struct Map myMap = {malloc(50 * 50 * sizeof(uint8_t)), 50, {{0xB0,0xB0,0xB0},  {0xDB,0xDB,0xDB}, {0xB3,0xDD,0xEF}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}};
-    struct Map myMap = {malloc(64 * 64 * sizeof(uint8_t)), 64, {{0xDB,0xDB,0xDB},  {0xB2,0xB2,0xB2}, {0xF7,0xF7,0xF7}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
+    struct Map myMap = {malloc(8 * 32 * sizeof(uint8_t)), 32, {{0xDB,0xDB,0xDB},  {0xB2,0xB2,0xB2}, {0xF7,0xF7,0xF7}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
 
     //memset(myMap.buffer, 0x00, 128 * 256);
 
 
-    myMap.posX = 33;
-    myMap.posY = 33;
+    myMap.posX = 16;
+    myMap.posY = 16;
+
+
+
+
+
+
 
     //builds(&myMap, posX, posY,);
 
 
 
-    RCC->AHBENR |= RCC_AHBPeriph_GPIOA; //Enabling clock for IO Port A
-    RCC->AHBENR |= RCC_AHBPeriph_GPIOB;
-    RCC->AHBENR |= RCC_AHBPeriph_GPIOC;
-    RCC->AHBENR |= RCC_AHBPeriph_GPIOD;
-
-    setPortMode(RIGHT_JOY_STICK, IN_MODE); //Porten RJS er forbundet til s�ttes til input-mode.
-    setPortPuPd(RIGHT_JOY_STICK, NO_PULL); //Porten er forbundet til 1/0 i hardware, det er ikke n�dvendigt med pull ?? Anders
-
-    setPortMode(UP_JOY_STICK, IN_MODE);
-    setPortPuPd(UP_JOY_STICK, NO_PULL);
-
-    setPortMode(CENTER_JOY_STICK, IN_MODE);
-    setPortPuPd(CENTER_JOY_STICK, NO_PULL);
-
-    setPortMode(LEFT_JOY_STICK, IN_MODE);
-    setPortPuPd(LEFT_JOY_STICK, NO_PULL);
-
-    setPortMode(DOWN_JOY_STICK, IN_MODE);
-    setPortPuPd(DOWN_JOY_STICK, NO_PULL);
-
     while(1)
     {
-
-        uint8_t joy = readJoystick();
-
-        if(joy & 0x1){
-            //up
-            player.y--;
-        }
-        if(joy & 0x2){
-            //up
-            player.y++;
-        }
-        if(joy & 0x4){
-            //up
-            player.x--;
-        }
-        if(joy & 0x8){
-            //up
-            player.x++;
-        }
-
-        player.x = MAX(player.x,  0);
-        player.y = MAX(player.y,  0);
-        player.x = MIN(player.x,  myMap.mySize - 1);
-        player.y = MIN(player.y,  myMap.mySize - 1);
-
-        //the position used as the players position (we max out at the bounderies of the map)
-        uint16_t showX = MIN(myMap.mySize - 1 - player.viewSize, MAX(0, player.x - player.viewSize));
-        uint16_t showY = MIN(myMap.mySize - 1 - player.viewSize, MAX(0, player.y - player.viewSize));
-
-        printSubMap(&myMap, &player, showX, showY, player.viewSize * 2, player.viewSize * 2);
-        gotoxy(0,0);
-        printf(myMap.renderBuffer);
-
-
-        gotoxy(0,0);
+        builds(&myMap);
+        printSubMap(&myMap, 0,0, 32,32);
+        myMap.posX++;
         myMap.posX++;
         myMap.posY++;
+
+        gotoxy(0,0);
     };
 }
+
