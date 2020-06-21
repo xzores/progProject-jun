@@ -345,19 +345,44 @@ uint16_t readFromTerminal(char * s, uint16_t limit) { //Tager en pointer til et 
 }*/
 
 
-void motion(struct Map * myMap) {
-    char dir = uart_get_char();
-    if (dir == 'w' && myMap->posY > 15) { //kør nord
+void motion(struct Map * myMap, char key) {
+
+    if (key == 'w' && myMap->posY > 15) { //kør nord
         myMap->posY--;
-    } else if (dir == 's' && myMap->posY < 127 - 15) { //kør syd
+    } else if (key == 's' && myMap->posY < 127 - 15) { //kør syd
         myMap->posY++;
-    } else if (dir == 'a' && myMap->posX > 15) { // kør vest
+    } else if (key == 'a' && myMap->posX > 15) { // kør vest
         myMap->posX--;
-    } else if (dir == 'd' && myMap->posY < 255 - 15) { // kør øst
+    } else if (key == 'd' && myMap->posY < 255 - 15) { // kør øst
         myMap->posX++;
     }
-    uart_clear();
+
 }
+
+void keyCommands(char * key, uint8_t * bEnable) {
+
+    if (*key == 'b') {
+        if (*bEnable == 1) {
+        bossKey(&key);
+        }
+        blink(0);
+        *key = '\0';
+    }
+}
+
+void bossKey(char * key) {
+    gotoxy(0,0);
+    bgcolor(0);
+    clearTermninal();
+    blink(1);
+    gotoxy(8,15);
+    printf("Sending important");
+    gotoxy(8,16);
+    printf("business emails");
+
+}
+
+
 static uint8_t mem[100*100];
 
 int main(void)
@@ -375,6 +400,10 @@ int main(void)
 
     myMap.posX = 16;
     myMap.posY = 16;
+    char key;
+    char nextKey;
+    uint8_t bossEnable = 0;
+
 
 
 
@@ -388,11 +417,31 @@ int main(void)
 
     while(1)
     {
-        builds(&myMap);
-        printSubMap(&myMap, 0,0, 32,32);
-        motion(&myMap);
+        nextKey = uart_get_char();
+        if (nextKey != '\0') {
+            if (nextKey == 'b') {
+            bossEnable = !bossEnable;
+            key = 'b';
+            } else {
+            key = nextKey;
+            }
+        }
 
+        uart_clear();
+
+
+        builds(&myMap);
+
+        if (!bossEnable) {
+        printSubMap(&myMap, 0,0, 32,32);
+        motion(&myMap, key);
+        }
+
+        keyCommands(&key, &bossEnable);
+        key = '\0';
         gotoxy(0,0);
-    };
+
+
+    }
 }
 
