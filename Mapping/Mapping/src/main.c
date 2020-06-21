@@ -321,8 +321,43 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 9, 0, 10, 10, 'G');
     buildMap(myMap, 10, 1, 8, 8, 'W'); */
 }
+/*
+uint16_t readFromTerminal(char * s, uint16_t limit) { //Tager en pointer til et chararray
+    //uart_clear();
+    static uint16_t i;
+
+    char c = uart_get_char(); //Første char indlæses i arrayet
+    while (c != '\0') { // 0 eller enter
+
+        if(c == '\r' || i >= limit){
+            s[i] = '\0'; //Der sættes \0 på første index efter input-string.
+            i = 0;
+            return i;
+        }
+
+        s[i] = c; //Værdien på adressen s[i] sættes til værdi af typen char.
+        printf("%c",c); //printer nuværende string
+        i++;
+        c = uart_get_char();
+    }
+
+    return i;
+}*/
 
 
+void motion(struct Map * myMap) {
+    char dir = uart_get_char();
+    if (dir == 'w' && myMap->posY > 15) { //kør nord
+        myMap->posY--;
+    } else if (dir == 's' && myMap->posY < 127 - 15) { //kør syd
+        myMap->posY++;
+    } else if (dir == 'a' && myMap->posX > 15) { // kør vest
+        myMap->posX--;
+    } else if (dir == 'd' && myMap->posY < 255 - 15) { // kør øst
+        myMap->posX++;
+    }
+    uart_clear();
+}
 static uint8_t mem[100*100];
 
 int main(void)
@@ -355,9 +390,7 @@ int main(void)
     {
         builds(&myMap);
         printSubMap(&myMap, 0,0, 32,32);
-        myMap.posX++;
-        myMap.posX++;
-        myMap.posY++;
+        motion(&myMap);
 
         gotoxy(0,0);
     };
