@@ -23,6 +23,9 @@
 #define GREEN_LED GPIOC, 7
 #define RED_LED GPIOB, 4
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 //self explanatory
 inline int32_t power(int32_t a, int32_t exp) {
 // calculates a^exp

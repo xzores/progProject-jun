@@ -269,7 +269,7 @@ Discarded input sections
  .debug_macro   0x00000000       0x11 obj\debug\~#\common\gui.o
  .debug_macro   0x00000000      0x892 obj\debug\~#\common\gui.o
  .debug_line    0x00000000       0x30 obj\debug\~#\common\gui.o
- .debug_str     0x00000000     0x2502 obj\debug\~#\common\gui.o
+ .debug_str     0x00000000     0x2500 obj\debug\~#\common\gui.o
  .comment       0x00000000       0x6f obj\debug\~#\common\gui.o
  .ARM.attributes
                 0x00000000       0x33 obj\debug\~#\common\gui.o
@@ -287,7 +287,7 @@ Discarded input sections
  .debug_macro   0x00000000      0x892 obj\debug\~#\common\lut.o
  .debug_macro   0x00000000       0x10 obj\debug\~#\common\lut.o
  .debug_line    0x00000000       0x39 obj\debug\~#\common\lut.o
- .debug_str     0x00000000     0x2529 obj\debug\~#\common\lut.o
+ .debug_str     0x00000000     0x2527 obj\debug\~#\common\lut.o
  .comment       0x00000000       0x6f obj\debug\~#\common\lut.o
  .ARM.attributes
                 0x00000000       0x33 obj\debug\~#\common\lut.o
@@ -435,9 +435,9 @@ Discarded input sections
  .debug_macro   0x00000000       0xd7 obj\debug\~#\common\utility.o
  .debug_macro   0x00000000       0x16 obj\debug\~#\common\utility.o
  .debug_macro   0x00000000      0x189 obj\debug\~#\common\utility.o
- .debug_macro   0x00000000       0x5e obj\debug\~#\common\utility.o
+ .debug_macro   0x00000000       0x6a obj\debug\~#\common\utility.o
  .debug_line    0x00000000      0x61b obj\debug\~#\common\utility.o
- .debug_str     0x00000000    0x56671 obj\debug\~#\common\utility.o
+ .debug_str     0x00000000    0x566b5 obj\debug\~#\common\utility.o
  .comment       0x00000000       0x6f obj\debug\~#\common\utility.o
  .debug_frame   0x00000000      0x194 obj\debug\~#\common\utility.o
  .ARM.attributes
@@ -583,7 +583,7 @@ Discarded input sections
  .debug_macro   0x00000000       0x16 obj\debug\~#\common\vector.o
  .debug_macro   0x00000000      0x189 obj\debug\~#\common\vector.o
  .debug_line    0x00000000      0x5ee obj\debug\~#\common\vector.o
- .debug_str     0x00000000    0x55eea obj\debug\~#\common\vector.o
+ .debug_str     0x00000000    0x55ee8 obj\debug\~#\common\vector.o
  .comment       0x00000000       0x6f obj\debug\~#\common\vector.o
  .debug_frame   0x00000000      0x148 obj\debug\~#\common\vector.o
  .ARM.attributes
@@ -3741,7 +3741,7 @@ Discarded input sections
  .debug_macro   0x00000000       0xd7 obj\debug\src\main.o
  .debug_macro   0x00000000       0x16 obj\debug\src\main.o
  .debug_macro   0x00000000      0x189 obj\debug\src\main.o
- .debug_macro   0x00000000       0x5e obj\debug\src\main.o
+ .debug_macro   0x00000000       0x6a obj\debug\src\main.o
  .data          0x00000000        0x0 obj\debug\src\startup_stm32f30x.o
  .bss           0x00000000        0x0 obj\debug\src\startup_stm32f30x.o
  .group         0x00000000        0x8 obj\debug\src\system_stm32f30x.o
@@ -4729,18 +4729,18 @@ OUTPUT(bin\Debug\Ex1.elf elf32-littlearm)
  .debug_line    0x0000224f       0xbb obj\debug\src\startup_stm32f30x.o
  .debug_line    0x0000230a      0x493 obj\debug\src\system_stm32f30x.o
 
-.debug_str      0x00000000    0x57d19
- .debug_str     0x00000000    0x568a9 obj\debug\~#\common\30010_io.o
-                              0x56b02 (size before relaxing)
- .debug_str     0x000568a9      0x152 obj\debug\~#\common\ansi.o
-                               0x708c (size before relaxing)
- .debug_str     0x000569fb      0x939 obj\debug\spl\src\stm32f30x_rcc.o
+.debug_str      0x00000000    0x57d5d
+ .debug_str     0x00000000    0x568a7 obj\debug\~#\common\30010_io.o
+                              0x56b00 (size before relaxing)
+ .debug_str     0x000568a7      0x152 obj\debug\~#\common\ansi.o
+                               0x708a (size before relaxing)
+ .debug_str     0x000569f9      0x939 obj\debug\spl\src\stm32f30x_rcc.o
                               0x52dca (size before relaxing)
- .debug_str     0x00057334      0x7b2 obj\debug\spl\src\stm32f30x_usart.o
+ .debug_str     0x00057332      0x7b2 obj\debug\spl\src\stm32f30x_usart.o
                               0x52c9e (size before relaxing)
- .debug_str     0x00057ae6      0x153 obj\debug\src\main.o
-                              0x55f8d (size before relaxing)
- .debug_str     0x00057c39       0xe0 obj\debug\src\system_stm32f30x.o
+ .debug_str     0x00057ae4      0x199 obj\debug\src\main.o
+                              0x55fd1 (size before relaxing)
+ .debug_str     0x00057c7d       0xe0 obj\debug\src\system_stm32f30x.o
                               0x5245c (size before relaxing)
 
 .debug_frame    0x00000000     0x1bc8
