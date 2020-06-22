@@ -14,6 +14,7 @@
 #include "stm32f30x_conf.h"
 #include "Utility.h"
 #include "30010_io.h"
+
  void io_config()
  {
     RCC->AHBENR |= RCC_AHBPeriph_GPIOA; // Enable clock for GPIO Port A
