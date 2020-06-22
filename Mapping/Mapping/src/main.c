@@ -20,6 +20,7 @@
 struct Map{
 
     uint8_t* buffer;
+
     uint16_t mySize;
     char style[4][3];
     uint8_t colors[4], posX, posY;
@@ -39,7 +40,6 @@ void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, i
                     } else {
                     *z = pos + (Size / 2) - b; //Hvis boksen g�r ud over vinduet
                     }
-
         }
 
         if (b >= pos) { // Boksen starter i 1. eller 4. kvadrant
@@ -56,9 +56,9 @@ void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, i
             *z = bSize - (pos - (Size / 2) - b);
         }
     }
-    /*
-    *s = MAX(0, MIN(Size - 1, *s));
-    *z = MAX(0, MIN(Size - 1, *z)); */
+
+    *s = MAX(0, MIN(Size, *s));
+    *z = MAX(0, MIN(Size, *z));
 }
 
 struct Player{
@@ -97,8 +97,12 @@ void buildMap(struct Map* myMap, uint16_t bx, uint16_t by, uint16_t sizeX, uint1
             for (j = ys; j < ys + yz; j++) {
                 uint8_t shiftIndex = (i % 4) * 2;
                 uint16_t index = i / 4;
-                myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize] &= ~(0x3 << shiftIndex); //tile resettes //index % myMap->mySize er altid lig index ??
-                myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize] |= (type << shiftIndex);
+
+                if(j > myMap->mySize || i > myMap->mySize)
+                    continue;
+
+                myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize / 4 ] &= ~(0x3 << shiftIndex); //tile resettes //index % myMap->mySize er altid lig index ??
+                myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize / 4 ] |= (type << shiftIndex);
             }
         }
     }
@@ -172,10 +176,11 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
 
     for (j = 0; j < myMap->mySize; j++) {
         t = 0;
+        uint8_t lastTile = 0;
 
         for (i = 0; i < myMap->mySize / 4; i++){
 
-            uint8_t data = myMap->buffer[j * myMap->mySize + i];
+            uint8_t data = myMap->buffer[j * myMap->mySize / 4 + i];
 
             uint8_t d1, d2, d3, d4;
             d1 = (data & (3 << 0)) >> 0;
@@ -183,16 +188,38 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
             d3 = (data & (3 << 4)) >> 4;
             d4 = (data & (3 << 6)) >> 6;
 
-            uint8_t r = rand() % 3;
+            uint16_t posX = myMap->posX + i * 4;
+            uint16_t posY = myMap->posY + j;
+            uint16_t b = (posX * 5) % 231 + posY % 51;
+            srand(b);
+            uint16_t r = rand() % 3;
 
             t = tileScheme(&toPrint, t, d1); //ESC-codes tilføjes til toPrint, t opdateres
             toPrint[t++] = myMap->style[d1][r];
+
+            posX++;
+            b = (posX * 5) % 231 + posY % 51;
+            srand(b);
+            r = rand() % 3;
+
             if (d2 != d1)
             t = tileScheme(&toPrint, t, d2);
             toPrint[t++] = myMap->style[d2][r];
+
+            posX++;
+            b = (posX * 5) % 231 + posY % 51;
+            srand(b);
+            r = rand() % 3;
+
             if (d3 != d2)
             t = tileScheme(&toPrint, t, d3);
             toPrint[t++] = myMap->style[d3][r];
+
+            posX++;
+            b = (posX * 5) % 231 + posY % 51;
+            srand(b);
+            r = rand() % 3;
+
             if (d4 != d3)
             t = tileScheme(&toPrint, t, d4);
             toPrint[t++] = myMap->style[d4][r];
@@ -204,8 +231,6 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
         printf(toPrint);
     };
 }
-
-
 
 void builds(struct Map * myMap) {
     //Gr�s-l�rred
@@ -388,15 +413,20 @@ uint16_t readFromTerminal(char * s, uint16_t limit) { //Tager en pointer til et 
 }*/
 
 
-void motion(struct Map * myMap, char key) {
+void motion(struct Map* myMap, char key) {
+    gotoxy(17,17);
+    uint8_t m = myMap->mySize / 2 - 1;
+    uint8_t index = 131 - 8;//(myMap->mySize / 2) * (myMap->mySize / 4) - 1;
+    uint8_t detected = myMap->buffer[index] && (1 << 6) >> 6;
+    uint8_t nextN = myMap->buffer[index] && (3 << (myMap->posX % 4)) >> (myMap->posX % 4); // next north
 
-    if (key == 'w' && myMap->posY > 15) { //kør nord
+    if (key == 'w' && myMap->posY > m) { //kør nord
         myMap->posY--;
-    } else if (key == 's' && myMap->posY < 127 - 15) { //kør syd
+    } else if (key == 's' && myMap->posY < 127 - m) { //kør syd
         myMap->posY++;
-    } else if (key == 'a' && myMap->posX > 15) { // kør vest
+    } else if (key == 'a' && myMap->posX > m) { // kør vest
         myMap->posX--;
-    } else if (key == 'd' && myMap->posY < 255 - 15) { // kør øst
+    } else if (key == 'd' && myMap->posX < 255 - m) { // kør øst
         myMap->posX++;
     }
 
@@ -416,30 +446,35 @@ void keyCommands(char * key, uint8_t * bEnable) {
 void bossKey(char * key) {
     gotoxy(0,0);
     bgcolor(0);
+    gotoxy(8,16);
+    printf("business emails");
+
     clearTermninal();
     blink(1);
     gotoxy(8,15);
     printf("Sending important");
-    gotoxy(8,16);
-    printf("business emails");
+}
+
+void drawPlayer(struct Map * myMap, uint8_t x, uint8_t y, char look){
+    gotoxy(myMap->posX - x + myMap->mySize, myMap->posY - y + myMap->mySize);
+    printf(look);
 
 }
 
-
-
-static uint8_t mem[100*100];
-
 int main(void)
 {
-    srand(10321);
 
-    uart_init(115200);
+    uart_init(515200);
     homeCurser(); //Sæt curser til 0,0
     clearTermninal(); // Ryd terminal
     //struct Map myMap = {malloc(50 * 50 * sizeof(uint8_t)), 50, {{0xB0,0xB0,0xB0},  {0xDB,0xDB,0xDB}, {0xB3,0xDD,0xEF}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}};
-    struct Map myMap = {malloc(8 * 32 * sizeof(uint8_t)), 32, {{0xDB,0xDB,0xDB},  {0xB2,0xB2,0xB2}, {0xF7,0xF7,0xF7}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
+    struct Map myMap = {malloc(8 * 33 * sizeof(uint8_t)), 32, {{0xDB,0xDB,0xDB},  {0xB2,0xB2,0xB2}, {',',' ','"'}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
+
+    myMap.buffer[8*33] = 112;
 
     //memset(myMap.buffer, 0x00, 128 * 256);
+
+    uint8_t x = 16,y = 16;
 
 
     myMap.posX = 16;
@@ -449,45 +484,31 @@ int main(void)
     uint8_t bossEnable = 0;
 
 
-
-
-
-
-
-
-
-
     //builds(&myMap, posX, posY,);
-
-
 
     while(1)
     {
         nextKey = uart_get_char();
         uart_clear();
         if (nextKey != '\0') {
-            if (nextKey == 'b') {
-            bossEnable = !bossEnable;
-            key = 'b';
-            } else {
+            if (nextKey == 'b')
+                bossEnable = !bossEnable;
+
             key = nextKey;
-            }
         }
 
-
+        myMap.buffer[8*33] = 112;
         builds(&myMap);
 
         if (!bossEnable) {
-        printSubMap(&myMap, 0,0, 32,32);
-        motion(&myMap, key);
+            printSubMap(&myMap, 0,0, 32,32);
+            motion(&myMap, key);
         }
+
+        //drawPlayer(&myMap, x, y, 'P');
 
         keyCommands(&key, &bossEnable);
         key = '\0';
-
-
-
-
 
         gotoxy(0,0);
     }
