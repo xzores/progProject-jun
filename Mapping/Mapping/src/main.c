@@ -306,8 +306,51 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 116, 102, 32, 8, 'W'); // F3
     buildMap(myMap, 116, 111, 32, 10, 'W'); //
 
+    //sektor 3
+    buildMap(myMap, 177, 7, 37, 5, 'W'); // Kraftvarmeværk
+    buildMap(myMap, 211, 12, 4, 6, 'W'); // KV2
+    buildMap(myMap, 177, 12, 9, 6, 'W'); // KV3
+    buildMap(myMap, 197, 17, 6, 3, 'W'); // SIlo
+    buildMap(myMap, 198, 16, 4, 5, 'W'); // Silo 2
+    buildMap(myMap, 173, 49, 12, 23, 'W'); // Diamanten
+    buildMap(myMap, 184, 42, 9, 14, 'W'); // D2
+    buildMap(myMap, 184, 39, 2, 3, 'W'); // D3
+    buildMap(myMap, 172, 86, 11, 33, 'W'); // B423
+    buildMap(myMap, 205, 85, 11, 31, 'W'); // B427
 
+    //Sektor 4
+    buildMap(myMap, 225, 7, 5, 5, 'W'); //VKR1
+    buildMap(myMap, 230, 7, 16, 3, 'W'); // VKR2
+    buildMap(myMap, 242, 3, 4, 7, 'W'); // VKR3
+    buildMap(myMap, 233, 17, 13, 3, 'W'); // VKR4
 
+    buildMap(myMap, 226, 29, 5, 10, 'W'); //Netto
+    buildMap(myMap, 235, 29, 5, 10, 'W'); //Kampsax
+    buildMap(myMap, 231, 37, 5, 10, 'W');
+    buildMap(myMap, 226, 45, 5, 10, 'W');
+    buildMap(myMap, 231, 53, 5, 10, 'W');
+    buildMap(myMap, 226, 61, 5, 10, 'W');
+    buildMap(myMap, 231, 69, 5, 10, 'W');
+    buildMap(myMap, 226, 78, 5, 10, 'W');
+    buildMap(myMap, 235, 78, 5, 10, 'W');
+    buildMap(myMap, 231, 86, 5, 10, 'W');
+    buildMap(myMap, 226, 94, 5, 10, 'W');
+    buildMap(myMap, 235, 94, 5, 10, 'W');
+
+    buildMap(myMap, 242, 29, 5, 10, 'W');
+    buildMap(myMap, 245, 37, 5, 10, 'W');
+    buildMap(myMap, 242, 45, 5, 10, 'W');
+    buildMap(myMap, 245, 53, 5, 10, 'W');
+    buildMap(myMap, 242, 61, 5, 10, 'W');
+    buildMap(myMap, 245, 69, 5, 10, 'W');
+    buildMap(myMap, 242, 78, 5, 10, 'W');
+    buildMap(myMap, 245, 86, 5, 10, 'W');
+    buildMap(myMap, 242, 86, 5, 10, 'W');
+    buildMap(myMap, 245, 94, 5, 10, 'W');
+
+    buildMap(myMap, 242, 96, 6, 16, 'W');
+    buildMap(myMap, 230, 112, 18, 5, 'W');
+    buildMap(myMap, 225, 115, 6, 5, 'W');
 
 
 
@@ -383,6 +426,7 @@ void bossKey(char * key) {
 }
 
 
+
 static uint8_t mem[100*100];
 
 int main(void)
@@ -411,6 +455,8 @@ int main(void)
 
 
 
+
+
     //builds(&myMap, posX, posY,);
 
 
@@ -418,6 +464,7 @@ int main(void)
     while(1)
     {
         nextKey = uart_get_char();
+        uart_clear();
         if (nextKey != '\0') {
             if (nextKey == 'b') {
             bossEnable = !bossEnable;
@@ -426,8 +473,6 @@ int main(void)
             key = nextKey;
             }
         }
-
-        uart_clear();
 
 
         builds(&myMap);
@@ -439,9 +484,12 @@ int main(void)
 
         keyCommands(&key, &bossEnable);
         key = '\0';
+
+
+
+
+
         gotoxy(0,0);
-
-
     }
 }
 
