@@ -15,20 +15,65 @@
 #include <stdlib.h>
 #include "30010_io.h"
 #include "Utility.h"
+#include <string.h>
 
 struct Map{
 
     uint8_t* buffer;
     uint16_t mySize;
     char style[4][3];
-    uint8_t colors[4];
+    uint8_t colors[4], posX, posY;
+
 };
 
+void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, int16_t* z, uint8_t* enableBuild){
 
-void buildMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t sizeY, char style) {
+    if ((pos - (b + bSize)) < (Size / 2) || (b - pos) < (Size / 2)) {//afstanden mellem player og blok er mindre end et halvt vindue
+
+        *enableBuild = 1; //Der skrives til array hvis et if-statement aktiveres
+
+        if ((pos - b) <= (Size / 2) && (pos - b) > 0) { //Boks starter i 2. eller 3. kvadrant
+            *s = (Size / 2) - (pos - b);
+                if ((pos + (Size / 2) - b) >= bSize) { //Hvis resten af vinduet er l�ngere end boksen
+                    *z = bSize;
+                    } else {
+                    *z = pos + (Size / 2) - b; //Hvis boksen g�r ud over vinduet
+                    }
+
+        }
+
+        if (b >= pos) { // Boksen starter i 1. eller 4. kvadrant
+
+            *s = (Size / 2) + b - pos;
+                if ((Size / 2) - (b - pos) >= bSize) {//Hvis resten af vinduet er l�ngere end boksen
+                    *z = bSize;
+                } else {
+                    *z = (Size / 2) - (b - pos); //Hvis boksen g�r ud over vinduet
+                }
+
+        } else if (b < (pos - (Size / 2))) { //Boksen starter udenfor vinduet
+            *s = 0;
+            *z = bSize - (pos - (Size / 2) - b);
+        }
+    }
+    /*
+    *s = MAX(0, MIN(Size - 1, *s));
+    *z = MAX(0, MIN(Size - 1, *z)); */
+}
+
+struct Player{
+
+    int16_t x;
+    int16_t y;
+    char look;
+    uint8_t viewSize;
+
+};
+
+void buildMap(struct Map* myMap, uint16_t bx, uint16_t by, uint16_t sizeX, uint16_t sizeY, char style) {
 
     uint16_t i, j;
-    uint8_t type;
+    uint8_t type, enableBuildX = 0, enableBuildY = 0;
 
     if (style == 'R') {
         type = 0;
@@ -40,16 +85,26 @@ void buildMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t si
         type = 3;
     }
 
+    int16_t xs, ys, xz, yz;
 
-    for (i = x; i < x + sizeX; i++) {
-        for (j = y; j < y + sizeY; j++) {
-            uint8_t shiftIndex = (i % 4) * 2;
-            uint16_t index = i / 4;
-            myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize] &= ~(0x3 << shiftIndex); //tile resettes //index % myMap->mySize er altid lig index ??
-            myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize] |= (type << shiftIndex);
+    //X-akse
+    calcAkse(myMap->posX, myMap->mySize, sizeX, bx, &xs, &xz, &enableBuildX);
+
+    calcAkse(myMap->posY, myMap->mySize, sizeY, by, &ys, &yz, &enableBuildY);
+
+    if (enableBuildX && enableBuildY) { //Der skrives til buffer, hvis figuren på begge akser ligger inden for radius
+        for (i = xs; i < xs + xz; i++) {
+            for (j = ys; j < ys + yz; j++) {
+                uint8_t shiftIndex = (i % 4) * 2;
+                uint16_t index = i / 4;
+                myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize] &= ~(0x3 << shiftIndex); //tile resettes //index % myMap->mySize er altid lig index ??
+                myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize] |= (type << shiftIndex);
+            }
         }
-    };
-};
+    }
+
+}
+
 
 
 struct visual{
@@ -75,7 +130,7 @@ uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
         myScheme.digit2 = '2';
         myScheme.digit3 = '4';
         myScheme.digit4 = '2';
-     } else if (style == 3) { //Lygtep�l, FG 93, BG 43, INv 0ff
+     } else if (style == 3) { //Lygtep�l, FG 93, BG 43, INv 0ff
         myScheme.digit1 = '9';
         myScheme.digit2 = '3';
         myScheme.digit3 = '4';
@@ -104,7 +159,8 @@ uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
     toPrint[t++] = 'm';
 
     return t;
-    }
+}
+
 
 
 void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t sizeY) {
@@ -112,15 +168,12 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
     uint8_t i, j, t;
 
 
-    char toPrint[sizeX * sizeY *10 + 2]; // *10 ??
+    char toPrint[sizeX * sizeY * 10 + 2]; // *10 ??
 
-
-
-
-    for (j = y; j < y + sizeY; j++) {
+    for (j = 0; j < myMap->mySize; j++) {
         t = 0;
 
-        for (i = x / 4; i < (x + sizeX) / 4 + 1; i++){
+        for (i = 0; i < myMap->mySize / 4; i++){
 
             uint8_t data = myMap->buffer[j * myMap->mySize + i];
 
@@ -132,7 +185,7 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
 
             uint8_t r = rand() % 3;
 
-            t = tileScheme(&toPrint, t, d1); //ESC-codes tilf�jes til toPrint, t opdateres
+            t = tileScheme(&toPrint, t, d1); //ESC-codes tilføjes til toPrint, t opdateres
             toPrint[t++] = myMap->style[d1][r];
             if (d2 != d1)
             t = tileScheme(&toPrint, t, d2);
@@ -152,17 +205,19 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
     };
 }
 
-builds(struct Map * myMap) {
-    //Gr�s-l�rred
+
+
+void builds(struct Map * myMap) {
+    //Gr�s-l�rred
     buildMap(myMap, 0, 0, 255, 127, 'G');
 
     //Major Roads
     buildMap(myMap, 0, 0, 255, 4, 'R'); // Anker Engelundsvej
     buildMap(myMap, 0, 4, 6, 118, 'R'); // Lundtoftevej
     buildMap(myMap, 0, 123, 255, 4, 'R'); // Akademivej
-    buildMap(myMap, 252, 4, 4, 121, 'R'); // Lundtofteg�rdvej
-    buildMap(myMap, 150, 4, 4, 120, 'R'); // Asmussens All�
-    buildMap(myMap, 165, 4, 4, 120, 'R'); //Niels Koppels All�
+    buildMap(myMap, 252, 4, 4, 121, 'R'); // Lundtofteg�rdvej
+    buildMap(myMap, 150, 4, 4, 120, 'R'); // Asmussens All�
+    buildMap(myMap, 165, 4, 4, 120, 'R'); //Niels Koppels All�
     buildMap(myMap, 219, 4, 4, 120, 'R'); // Kollegiebakken
     buildMap(myMap, 95, 64, 55, 3, 'R'); // Elektrovej
     buildMap(myMap, 6, 79, 100, 3, 'R'); // ELV2
@@ -175,16 +230,31 @@ builds(struct Map * myMap) {
     buildMap(myMap, 18, 93, 3, 29, 'R'); //Diplomvej
     buildMap(myMap, 21, 93, 9, 2, 'R'); // DPV2
     buildMap(myMap, 30, 82, 3, 13, 'R'); // DPV3
-    buildMap(myMap, 49, 87, 3, 35, 'R'); // Centrifugevej
+    buildMap(myMap, 49, 87, 3, 35, 'R'); // Centrifugevejint main(void)
+
     buildMap(myMap, 64, 98, 4, 24, 'R'); // Akustikvej
+    buildMap(myMap, 200, 42, 11, 36, 'R'); // Energivej
+    buildMap(myMap, 205, 42, 14, 34, 'R'); // EV2
+    buildMap(myMap, 188, 58, 12, 15, 'R'); // EV-P
+    buildMap(myMap, 226, 27, 12, 2, 'R'); // Nettovej
+    buildMap(myMap, 238, 28, 3, 1, 'R'); // KXV2
+    buildMap(myMap, 240, 29, 1, 11, 'R'); // KXV3
+    buildMap(myMap, 238, 40, 3, 1, 'R'); // KXV4
+    buildMap(myMap, 237, 40, 1, 16, 'R'); // KXV5
+    buildMap(myMap, 237, 56, 3, 1, 'R'); // KVX6
+    buildMap(myMap, 240, 56, 1 , 36, 'R'); // KXV7
+    buildMap(myMap, 223, 92, 2, 29,'R'); // KXV1
+    buildMap(myMap, 223, 97, 17, 2, 'R'); //KXV8
 
 
 
     // Torve og parkeringspladser
-    buildMap(myMap, 43, 89, 18, 33, 'R'); // �rsted plads
+    buildMap(myMap, 43, 89, 18, 33, 'R'); // �rsted plads
     buildMap(myMap, 95, 29, 30, 22, 'R'); // Matematiktorvet
     buildMap(myMap, 125, 29, 7, 1, 'R'); // Mtorv2
-    buildMap(myMap, 132, 27, 18, 3, 'R'); //Mtorv2
+    buildMap(myMap, 132, 27, 5, 3, 'R'); //Mtorv2
+    buildMap(myMap, 223, 27, 3, 8, 'R'); // NETTOP
+    buildMap(myMap, 229, 99, 11, 11, 'R'); //KX-P
 
 
 
@@ -192,7 +262,95 @@ builds(struct Map * myMap) {
     buildMap(myMap, 95, 51, 2, 13, 'R'); // sti 1
     buildMap(myMap, 47, 66, 1, 13, 'R'); // sti 5
     buildMap(myMap, 106, 81, 44, 1, 'R'); // Sti 6
+    buildMap(myMap, 154,68, 11, 2, 'R'); // Sti 2
+    buildMap(myMap, 154,98, 11, 2, 'R'); // Sti 3
+    buildMap(myMap, 169,27, 50, 1, 'R'); // Sti 4
 
+    //Bygninger/Walls Sektor 1m->
+
+   buildMap(myMap, 29, 12, 41, 6, 'W'); // B309
+    buildMap(myMap, 78, 9, 68, 14, 'W'); //B303
+    buildMap(myMap, 78, 22, 11, 11, 'W'); //B306
+    buildMap(myMap, 126, 31, 22, 6, 'W'); //B304
+    buildMap(myMap, 141, 37, 7, 8, 'W'); //B0305
+    buildMap(myMap, 127, 45, 21, 6, 'W'); //B321
+    buildMap(myMap, 99, 52, 26, 9, 'W'); //B324
+    buildMap(myMap, 126, 56, 21, 6, 'W'); //B322
+    buildMap(myMap, 54, 37, 36, 12, 'W'); //B308
+    buildMap(myMap, 65, 49, 3, 7, 'W'); //B3252
+    buildMap(myMap, 48, 56, 45, 6, 'W'); //B325
+    buildMap(myMap, 59, 62, 2, 5, 'W'); // SPace 2
+    buildMap(myMap, 49, 67, 19, 6, 'W'); // DTU Space
+
+    //Sektor 2
+    buildMap(myMap, 8, 83, 20, 3, 'W'); // Science Park
+    buildMap(myMap, 8, 88, 8, 2, 'W'); // SP2
+    buildMap(myMap, 8, 91, 8, 4, 'W'); // SP3
+    buildMap(myMap, 17, 86, 5, 6, 'W'); // SP4
+    buildMap(myMap, 7, 108, 6, 13, 'W'); // William Demant
+    buildMap(myMap, 10, 97, 7, 17, 'W'); // WD2
+    buildMap(myMap, 22, 110, 10, 10, 'W'); // Skylab
+    buildMap(myMap, 32, 110, 5, 2, 'W'); // Sky 2
+    buildMap(myMap, 22, 100, 10, 4, 'W'); // SKy 3
+    buildMap(myMap, 37, 85, 7, 20, 'W'); // Sky 4
+    buildMap(myMap, 56, 115, 4, 6, 'W'); // B1
+    buildMap(myMap, 53, 111, 10, 4, 'W'); // B2
+    buildMap(myMap, 59, 98, 1, 13, 'W'); // B3
+    buildMap(myMap, 53, 103, 10, 3, 'W'); // B4
+    buildMap(myMap, 56, 100, 3, 3, 'W'); // B5
+    buildMap(myMap, 71, 83, 77, 5, 'W'); // B341
+    buildMap(myMap, 78, 89, 14, 8, 'W'); // Hegnet
+    buildMap(myMap, 81, 88, 8, 1, 'W'); // Hegnet 2
+    buildMap(myMap, 118, 91, 30, 10, 'W'); // Fotonik1
+    buildMap(myMap, 116, 88, 2, 14, 'W'); // F2
+    buildMap(myMap, 116, 102, 32, 8, 'W'); // F3
+    buildMap(myMap, 116, 111, 32, 10, 'W'); //
+
+    //sektor 3
+    buildMap(myMap, 177, 7, 37, 5, 'W'); // Kraftvarmeværk
+    buildMap(myMap, 211, 12, 4, 6, 'W'); // KV2
+    buildMap(myMap, 177, 12, 9, 6, 'W'); // KV3
+    buildMap(myMap, 197, 17, 6, 3, 'W'); // SIlo
+    buildMap(myMap, 198, 16, 4, 5, 'W'); // Silo 2
+    buildMap(myMap, 173, 49, 12, 23, 'W'); // Diamanten
+    buildMap(myMap, 184, 42, 9, 14, 'W'); // D2
+    buildMap(myMap, 184, 39, 2, 3, 'W'); // D3
+    buildMap(myMap, 172, 86, 11, 33, 'W'); // B423
+    buildMap(myMap, 205, 85, 11, 31, 'W'); // B427
+
+    //Sektor 4
+    buildMap(myMap, 225, 7, 5, 5, 'W'); //VKR1
+    buildMap(myMap, 230, 7, 16, 3, 'W'); // VKR2
+    buildMap(myMap, 242, 3, 4, 7, 'W'); // VKR3
+    buildMap(myMap, 233, 17, 13, 3, 'W'); // VKR4
+
+    buildMap(myMap, 226, 29, 5, 10, 'W'); //Netto
+    buildMap(myMap, 235, 29, 5, 10, 'W'); //Kampsax
+    buildMap(myMap, 231, 37, 5, 10, 'W');
+    buildMap(myMap, 226, 45, 5, 10, 'W');
+    buildMap(myMap, 231, 53, 5, 10, 'W');
+    buildMap(myMap, 226, 61, 5, 10, 'W');
+    buildMap(myMap, 231, 69, 5, 10, 'W');
+    buildMap(myMap, 226, 78, 5, 10, 'W');
+    buildMap(myMap, 235, 78, 5, 10, 'W');
+    buildMap(myMap, 231, 86, 5, 10, 'W');
+    buildMap(myMap, 226, 94, 5, 10, 'W');
+    buildMap(myMap, 235, 94, 5, 10, 'W');
+
+    buildMap(myMap, 242, 29, 5, 10, 'W');
+    buildMap(myMap, 245, 37, 5, 10, 'W');
+    buildMap(myMap, 242, 45, 5, 10, 'W');
+    buildMap(myMap, 245, 53, 5, 10, 'W');
+    buildMap(myMap, 242, 61, 5, 10, 'W');
+    buildMap(myMap, 245, 69, 5, 10, 'W');
+    buildMap(myMap, 242, 78, 5, 10, 'W');
+    buildMap(myMap, 245, 86, 5, 10, 'W');
+    buildMap(myMap, 242, 86, 5, 10, 'W');
+    buildMap(myMap, 245, 94, 5, 10, 'W');
+
+    buildMap(myMap, 242, 96, 6, 16, 'W');
+    buildMap(myMap, 230, 112, 18, 5, 'W');
+    buildMap(myMap, 225, 115, 6, 5, 'W');
 
 
 
@@ -206,27 +364,132 @@ builds(struct Map * myMap) {
     buildMap(myMap, 9, 0, 10, 10, 'G');
     buildMap(myMap, 10, 1, 8, 8, 'W'); */
 }
+/*
+uint16_t readFromTerminal(char * s, uint16_t limit) { //Tager en pointer til et chararray
+    //uart_clear();
+    static uint16_t i;
+
+    char c = uart_get_char(); //Første char indlæses i arrayet
+    while (c != '\0') { // 0 eller enter
+
+        if(c == '\r' || i >= limit){
+            s[i] = '\0'; //Der sættes \0 på første index efter input-string.
+            i = 0;
+            return i;
+        }
+
+        s[i] = c; //Værdien på adressen s[i] sættes til værdi af typen char.
+        printf("%c",c); //printer nuværende string
+        i++;
+        c = uart_get_char();
+    }
+
+    return i;
+}*/
 
 
+void motion(struct Map * myMap, char key) {
+
+    if (key == 'w' && myMap->posY > 15) { //kør nord
+        myMap->posY--;
+    } else if (key == 's' && myMap->posY < 127 - 15) { //kør syd
+        myMap->posY++;
+    } else if (key == 'a' && myMap->posX > 15) { // kør vest
+        myMap->posX--;
+    } else if (key == 'd' && myMap->posY < 255 - 15) { // kør øst
+        myMap->posX++;
+    }
+
+}
+
+void keyCommands(char * key, uint8_t * bEnable) {
+
+    if (*key == 'b') {
+        if (*bEnable == 1) {
+        bossKey(&key);
+        }
+        blink(0);
+        *key = '\0';
+    }
+}
+
+void bossKey(char * key) {
+    gotoxy(0,0);
+    bgcolor(0);
+    clearTermninal();
+    blink(1);
+    gotoxy(8,15);
+    printf("Sending important");
+    gotoxy(8,16);
+    printf("business emails");
+
+}
+
+
+
+static uint8_t mem[100*100];
 
 int main(void)
 {
     srand(10321);
 
     uart_init(115200);
-    homeCurser(); //S�t curser til 0,0
+    homeCurser(); //Sæt curser til 0,0
     clearTermninal(); // Ryd terminal
     //struct Map myMap = {malloc(50 * 50 * sizeof(uint8_t)), 50, {{0xB0,0xB0,0xB0},  {0xDB,0xDB,0xDB}, {0xB3,0xDD,0xEF}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}};
-    struct Map myMap = {calloc(254, sizeof(uint8_t)), 50, {{0xDB,0xDB,0xDB},  {0xB2,0xB2,0xB2}, {0xF7,0xF7,0xF7}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
+    struct Map myMap = {malloc(8 * 32 * sizeof(uint8_t)), 32, {{0xDB,0xDB,0xDB},  {0xB2,0xB2,0xB2}, {0xF7,0xF7,0xF7}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
+
     //memset(myMap.buffer, 0x00, 128 * 256);
 
-    builds(&myMap);
+
+    myMap.posX = 16;
+    myMap.posY = 16;
+    char key;
+    char nextKey;
+    uint8_t bossEnable = 0;
+
+
+
+
+
+
+
+
+
+
+    //builds(&myMap, posX, posY,);
 
 
 
     while(1)
     {
-        printSubMap(&myMap, 93,62, 40,27);
+        nextKey = uart_get_char();
+        uart_clear();
+        if (nextKey != '\0') {
+            if (nextKey == 'b') {
+            bossEnable = !bossEnable;
+            key = 'b';
+            } else {
+            key = nextKey;
+            }
+        }
+
+
+        builds(&myMap);
+
+        if (!bossEnable) {
+        printSubMap(&myMap, 0,0, 32,32);
+        motion(&myMap, key);
+        }
+
+        keyCommands(&key, &bossEnable);
+        key = '\0';
+
+
+
+
+
         gotoxy(0,0);
-    };
+    }
 }
+

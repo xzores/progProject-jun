@@ -51,3 +51,5 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+Mapping/Mapping/Mapping.depend
+Mapping/Mapping/Mapping.elay
