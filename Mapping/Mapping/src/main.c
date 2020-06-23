@@ -362,13 +362,6 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 230, 112, 18, 5, 'W');
     buildMap(myMap, 225, 115, 6, 5, 'W');
 
-
-
-
-
-
-
-
     /*buildMap(myMap, 0, 0, 5, 10, 'G');
     buildMap(myMap, 5, 0, 4, 10, 'R');
     buildMap(myMap, 9, 0, 10, 10, 'G');
@@ -419,8 +412,6 @@ struct GlobalInfo {
     uint8_t isInBattle;
     uint8_t battingType; //0 = nobattle, 1 = standart lygtepel, 2 = wild, 3 = super....
 }
-
-static uint8_t mem[100*100];
 
 struct Image {
 
@@ -548,19 +539,6 @@ int main(void)
     char key;
     char nextKey;
     uint8_t bossEnable = 0;
-
-
-
-
-
-
-
-
-
-
-    //builds(&myMap, posX, posY,);
-
-
 
     while(1)
     {
