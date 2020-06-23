@@ -1,20 +1,6 @@
-/*
-**
-**                           Main.c
-**
-**
-**********************************************************************/
-/*
-   Last committed:     $Revision: 00 $
-   Last changed by:    $Author: $
-   Last changed date:  $Date:  $
-   ID:                 $Id:  $
-**********************************************************************/
-#include "stm32f30x_conf.h"
-#include "stm32f30x.h"
-#include "30010_io.h"
-#include "Utility.h"
-#include <stdlib.h>
+
+#include "Radio.h"
+
 void io_config()
  {
     RCC->AHBENR |= RCC_AHBPeriph_GPIOA; // Enable clock for GPIO Port A
@@ -126,8 +112,10 @@ static uint8_t station = 0;
 //-----------------------------------------------------------------------------------------------------------------------
 
 void TIM1_BRK_TIM15_IRQHandler (void){
-    if(station == -1){
-        setFreq(20 + rand() % 4000);
+    if(station == 255){
+        //srand(f);
+        //setFreq(20 + rand() % 4000);
+        //f++;
     }
     else{
         uint16_t* a = radio[station];
@@ -137,6 +125,7 @@ void TIM1_BRK_TIM15_IRQHandler (void){
     }
     TIM15->SR &= ~0x0001; //Clear interrupt bit
 }
+
 
 void configT2()
 {
@@ -195,9 +184,9 @@ void sprintFixed(uint32_t i, char* str){
  // Print a maximum of 4 decimal digits to avoid overflow
 }
 
-int main(void)
-{
 
+
+void setupRadio(char* toPrint){
     RCC->AHBENR |= RCC_AHBENR_GPIOBEN; // Enable clock line for GPIO bank B
     GPIOB->MODER &= ~(0x00000003 << (10 * 2)); // Clear mode register
     GPIOB->MODER |= (0x00000002 << (10 * 2)); // Set mode register
@@ -212,26 +201,19 @@ int main(void)
 
     setFreq(100);
 
-
-
-
     //potmetersjov-----------------------------------------------------
     //readAdc2();
 
     //LCD--------------------------------------------------------------
     lcd_init();
-    uart_init(9600);
     io_config();
-    char toPrint[256];
-    uint8_t buf[512];
-    lcd_graphics_buffer(buf, 512);
 
-    //Radio------------------------------------------------------------
+}
 
 
 
-  while(1)
-  {
+void updateRadio(char* toPrint, uint8_t* buf){
+
     uint32_t freq = remap(0, 256 << 16, 87 << 16, 108 << 16, convert(readAdc1())); // convert(readAdc1()); //remap(0, 256, 40, 2000, convert(readAdc1()));
     uint32_t vol = remap(0, 256 << 16, 0, 100 << 16, convert(readAdc2())); //convert(readAdc2()); //remap(0, 256, 0, 100, convert(readAdc2()));
     char freqstr[20];
@@ -261,11 +243,8 @@ int main(void)
 
     else
     {
-        configT15(1000);
-        station = -1;
+        //configT15();
+        setFreq(2000);
+        station = 255;
     }
-
-
-
-  }
 }

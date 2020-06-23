@@ -16,6 +16,7 @@
 #include "30010_io.h"
 #include "Utility.h"
 #include <string.h>
+#include "Radio.h"
 
 struct Map{
 
@@ -504,13 +505,16 @@ int main(void)
 
     uint8_t x = 16,y = 16;
 
-
     myMap.posX = 16;
     myMap.posY = 16;
     char key;
     char nextKey;
     uint8_t bossEnable = 0;
+    char radioToPrint[256];
+    uint8_t buf[512];
+    lcd_graphics_buffer(buf, 512);
 
+    setupRadio(radioToPrint);
 
     //builds(&myMap, posX, posY,);
 
@@ -526,24 +530,29 @@ int main(void)
             key = nextKey;
         }
 
-        if(!info.isInBattle){
+        if(!info.isInBattle && !bossEnable){
             builds(&myMap);
 
-            if (!bossEnable) {
-                printSubMap(&myMap, 0,0, 32,32);
-                encounter = motion(&myMap, key);
+            updateRadio(radioToPrint, buf);
 
-                if(encounter == 3){
-                    //enter battle
-                }
-                else if (encounter == 2) {
-                    uint8_t foundWild = (rand() % 10 == 8); //10 % change to encounter wild pokemon
-                    if(foundWild){
-                        info.isInBattle = 1;
-                        clearTermninal();
-                    }
+
+            printSubMap(&myMap, 0,0, 32,32);
+            encounter = motion(&myMap, key);
+
+            if(encounter == 3){
+                //enter battle
+            }
+            else if (encounter == 2) {
+                uint8_t foundWild = (rand() % 10 == 8); //10 % change to encounter wild pokemon
+                if(foundWild){
+                    info.isInBattle = 1;
+                    clearTermninal();
                 }
             }
+
+        }
+        else if(bossEnable){
+            keyCommands(&key, &bossEnable);
         }
         else{
             gotoxy(0,0);
@@ -551,7 +560,6 @@ int main(void)
 
         }
 
-        keyCommands(&key, &bossEnable);
         key = '\0';
 
         gotoxy(0,0);
