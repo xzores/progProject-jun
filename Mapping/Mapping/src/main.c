@@ -120,8 +120,11 @@ uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
     myScheme = default_visual;
 
     if (style == 0) { //Road, BG White, inv Off
-        myScheme.digit1 = '3';
+        myScheme.digit1 = '4';
         myScheme.digit2 = '7';
+        myScheme.digit3 = '3';
+        myScheme.digit4 = '0';
+        myScheme.inv = 0;
 
     } else if (style == 1) { //Wall, FG 90, BG, 40, INV ON
         myScheme.digit1 = '9';
@@ -195,7 +198,11 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
             uint16_t r = rand() % 3;
 
             t = tileScheme(&toPrint, t, d1); //ESC-codes tilføjes til toPrint, t opdateres
-            toPrint[t++] = myMap->style[d1][r];
+            if(i == 4 && j == 16)
+                toPrint[t++] = 'P';
+            else{
+                toPrint[t++] = myMap->style[d1][r];
+            }
 
             posX++;
             b = (posX * 5) % 231 + posY % 51;
@@ -221,8 +228,8 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
             r = rand() % 3;
 
             if (d4 != d3)
-            t = tileScheme(&toPrint, t, d4);
-            toPrint[t++] = myMap->style[d4][r];
+                t = tileScheme(&toPrint, t, d4);
+                toPrint[t++] = myMap->style[d4][r];
         }
 
         toPrint[t++] = '\n';
@@ -413,22 +420,38 @@ uint16_t readFromTerminal(char * s, uint16_t limit) { //Tager en pointer til et 
 }*/
 
 
-void motion(struct Map* myMap, char key) {
-    gotoxy(17,17);
-    uint8_t m = myMap->mySize / 2 - 1;
-    uint8_t index = 131 - 8;//(myMap->mySize / 2) * (myMap->mySize / 4) - 1;
-    uint8_t detected = myMap->buffer[index] && (1 << 6) >> 6;
-    uint8_t nextN = myMap->buffer[index] && (3 << (myMap->posX % 4)) >> (myMap->posX % 4); // next north
+uint8_t motion(struct Map* myMap, char key) {
 
-    if (key == 'w' && myMap->posY > m) { //kør nord
+    uint8_t m = myMap->mySize / 2 - 1;
+    uint8_t ret = -1;
+
+    //NÃ¦ste tile
+    uint8_t indexN = 127 - (myMap->mySize / 8) + 1;
+    uint8_t indexS = 127 + (myMap->mySize / 8) + (myMap->mySize / 4) + 1;
+    uint8_t indexE = 127 + (myMap->mySize / 8) + 1;
+    uint8_t indexW = 127 + (myMap->mySize / 8);
+    uint8_t nextN = myMap->buffer[indexN] & 0x3; // next north
+    uint8_t nextS = myMap->buffer[indexS] & 0x3; //next south
+    uint8_t nextE = (myMap->buffer[indexE] & (0x3 << 2)) >> 2; //next east
+    uint8_t nextW = (myMap->buffer[indexW] & (0x3 << 6)) >> 6; //next West
+
+
+
+    if (key == 'w' && myMap->posY > m && nextN != 1) { //kÃ¸r nord
         myMap->posY--;
-    } else if (key == 's' && myMap->posY < 127 - m) { //kør syd
+        ret = nextN;
+    } else if (key == 's' && myMap->posY < 127 - m && nextS != 1) { //kÃ¸r syd
         myMap->posY++;
-    } else if (key == 'a' && myMap->posX > m) { // kør vest
+        ret = nextS;
+    } else if (key == 'a' && myMap->posX > m && nextW != 1) { // kÃ¸r vest
         myMap->posX--;
-    } else if (key == 'd' && myMap->posX < 255 - m) { // kør øst
+        ret = nextE;
+    } else if (key == 'd' && myMap->posX < 255 - m && nextE != 1) { // kÃ¸r Ã¸st
         myMap->posX++;
+        ret = nextW;
     }
+
+    return ret;
 
 }
 
@@ -461,16 +484,21 @@ void drawPlayer(struct Map * myMap, uint8_t x, uint8_t y, char look){
 
 }
 
+struct GlobalInfo {
+    uint8_t isInBattle;
+    uint8_t battingType; //0 = nobattle, 1 = standart lygtepel, 2 = wild, 3 = super....
+
+};
+
 int main(void)
 {
+    struct GlobalInfo info = {0, 0};
 
     uart_init(515200);
     homeCurser(); //Sæt curser til 0,0
     clearTermninal(); // Ryd terminal
     //struct Map myMap = {malloc(50 * 50 * sizeof(uint8_t)), 50, {{0xB0,0xB0,0xB0},  {0xDB,0xDB,0xDB}, {0xB3,0xDD,0xEF}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}};
-    struct Map myMap = {malloc(8 * 33 * sizeof(uint8_t)), 32, {{0xDB,0xDB,0xDB},  {0xB2,0xB2,0xB2}, {',',' ','"'}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
-
-    myMap.buffer[8*33] = 112;
+    struct Map myMap = {malloc(8 * 33 * sizeof(uint8_t)), 32, {{' ',' ',' '},  {0xB2,0xB2,0xB2}, {',',' ','"'}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
 
     //memset(myMap.buffer, 0x00, 128 * 256);
 
@@ -488,6 +516,7 @@ int main(void)
 
     while(1)
     {
+        uint8_t encounter = 0;
         nextKey = uart_get_char();
         uart_clear();
         if (nextKey != '\0') {
@@ -497,15 +526,30 @@ int main(void)
             key = nextKey;
         }
 
-        myMap.buffer[8*33] = 112;
-        builds(&myMap);
+        if(!info.isInBattle){
+            builds(&myMap);
 
-        if (!bossEnable) {
-            printSubMap(&myMap, 0,0, 32,32);
-            motion(&myMap, key);
+            if (!bossEnable) {
+                printSubMap(&myMap, 0,0, 32,32);
+                encounter = motion(&myMap, key);
+
+                if(encounter == 3){
+                    //enter battle
+                }
+                else if (encounter == 2) {
+                    uint8_t foundWild = (rand() % 10 == 8); //10 % change to encounter wild pokemon
+                    if(foundWild){
+                        info.isInBattle = 1;
+                        clearTermninal();
+                    }
+                }
+            }
         }
+        else{
+            gotoxy(0,0);
+            printf("battle!");
 
-        //drawPlayer(&myMap, x, y, 'P');
+        }
 
         keyCommands(&key, &bossEnable);
         key = '\0';
