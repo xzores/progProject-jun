@@ -186,7 +186,17 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
             uint8_t r = rand() % 3;
 
             t = tileScheme(&toPrint, t, d1); //ESC-codes tilføjes til toPrint, t opdateres
-            toPrint[t++] = myMap->style[d1][r];
+            if(i == 4 && j == 16)
+                toPrint[t++] = 0xb8;
+            else{
+                toPrint[t++] = myMap->style[d1][r];
+            }
+
+            posX++;
+            b = (posX * 5) % 231 + posY % 51;
+            srand(b);
+            r = rand() % 3;
+
             if (d2 != d1)
             t = tileScheme(&toPrint, t, d2);
             toPrint[t++] = myMap->style[d2][r];
@@ -364,28 +374,7 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 9, 0, 10, 10, 'G');
     buildMap(myMap, 10, 1, 8, 8, 'W'); */
 }
-/*
-uint16_t readFromTerminal(char * s, uint16_t limit) { //Tager en pointer til et chararray
-    //uart_clear();
-    static uint16_t i;
 
-    char c = uart_get_char(); //Første char indlæses i arrayet
-    while (c != '\0') { // 0 eller enter
-
-        if(c == '\r' || i >= limit){
-            s[i] = '\0'; //Der sættes \0 på første index efter input-string.
-            i = 0;
-            return i;
-        }
-
-        s[i] = c; //Værdien på adressen s[i] sættes til værdi af typen char.
-        printf("%c",c); //printer nuværende string
-        i++;
-        c = uart_get_char();
-    }
-
-    return i;
-}*/
 
 
 void motion(struct Map * myMap, char key) {
@@ -426,8 +415,72 @@ void bossKey(char * key) {
 }
 
 
+struct GlobalInfo {
+    uint8_t isInBattle;
+    uint8_t battingType; //0 = nobattle, 1 = standart lygtepel, 2 = wild, 3 = super....
+}
 
 static uint8_t mem[100*100];
+
+struct Image {
+
+    uint8_t* imageData;
+    uint16_t width;
+    uint16_t heigth;
+
+};
+
+//{"\e[40m1", "\e[40m2", "\e[40m3", "\e[40m4", "\e[40m5"}
+static char charTransationTable[][10] = {"\e[40m ", "\e[47m ", "\e[107m ", "\e[103m ", "\e[41m ", "\e[46m ", "\e[100m "}; //Black , white, bright white, bright yellow, red, cyan, bright black
+
+void printSubImage(struct Image* img,
+                    uint8_t xStart, uint8_t yStart, uint8_t xEnd, uint8_t yEnd,
+                    uint8_t xScreen, uint8_t yScreen){
+
+    gotoxy(xScreen, yScreen);
+
+
+
+        for(uint8_t y = yStart; y < yEnd; y++){
+
+            gotoxy(xScreen, yScreen + y);
+            for(uint8_t x = xStart; x < xEnd; x++){
+                uint8_t charIndex = img->imageData[y * img->width + x];
+                char* a = charTransationTable[charIndex];
+                printf(a);
+            }
+        }
+
+}
+
+
+void fadeInEnemy(struct Image* img){
+
+    for(uint8_t i = 0; i < img->heigth; i++){
+
+       // printSubImage(img, 0, 0, img->width, i, 3, 3);
+    }
+
+}
+
+
+void lcd_battle(uint8_t* buf, uint8_t hoverPosition){
+
+    //buf
+
+}
+
+void drawHealth(char * fighter, uint8_t x, uint8_t y, uint8_t * hp) {
+
+    window(4,4,10,8,'A',fighter);
+    gotoxy(x,y);
+    uint8_t boxes = *hp / 28 + 1;
+    printf("\e[41m");
+    for (uint8_t i = 0; i < boxes; i++) {
+        printf(' ');
+    }
+
+}
 
 int main(void)
 {
@@ -441,6 +494,54 @@ int main(void)
 
     //memset(myMap.buffer, 0x00, 128 * 256);
 
+    uint8_t hp = 255;
+    struct Image lamp ={0, 8, 24};
+    struct Image van = {0,24,10};
+
+    uint8_t lamparr[] = {
+                        0,0,1,1,1,1,0,0,
+                        1,1,1,1,1,1,1,1,
+                        0,0,3,2,2,3,0,0,
+                        0,0,3,2,2,3,0,0,
+                        0,0,3,2,2,3,0,0,
+                        0,0,3,3,3,3,0,0,
+                        0,0,3,3,3,3,0,0,
+                        0,0,0,1,1,0,0,0,
+                        0,0,0,1,1,0,0,0,
+                        0,0,0,1,1,0,0,0,
+                        0,0,0,1,1,0,0,0,
+                        0,0,0,1,1,0,0,0,
+                        0,0,0,1,1,0,0,0,
+                        0,0,0,1,1,0,0,0,
+                        0,0,0,1,1,0,0,0,
+                        0,0,0,1,1,0,0,0,
+                        0,0,0,1,1,0,0,0,
+                        0,0,0,1,1,0,0,0,
+                        0,0,0,1,1,0,0,0,
+                        0,0,0,1,1,0,0,0,
+                        0,1,1,1,1,1,1,0,
+                        0,1,1,1,1,1,1,0,
+                        0,1,1,1,1,1,1,0,
+                        0,1,1,1,1,1,1,0
+                    };
+
+    uint8_t vanarr[] = {
+                        0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,
+                        0,2,2,4,4,4,2,4,4,4,2,4,2,4,2,2,2,5,5,5,0,0,0,0,
+                        0,2,2,4,2,4,2,2,4,2,2,4,2,4,2,2,2,5,5,5,5,0,0,0,
+                        0,2,2,4,2,4,2,2,4,2,2,4,2,4,2,2,2,5,5,5,5,5,0,0,
+                        0,2,2,4,4,4,2,2,4,2,2,4,4,4,2,2,2,2,2,2,2,2,2,0,
+                        0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,
+                        2,2,2,2,6,6,6,6,2,2,2,2,2,2,2,2,6,6,6,6,2,2,2,3,
+                        2,2,2,6,6,6,6,6,6,2,2,2,2,2,2,6,6,6,6,6,6,2,2,3,
+                        0,2,2,6,6,6,6,6,6,2,2,2,2,2,2,6,6,6,6,6,6,2,2,0,
+                        0,0,0,0,6,6,6,6,0,0,0,0,0,0,0,0,6,6,6,6,0,0,0,0
+                        };
+
+    lamp.imageData  = &lamparr;
+    van.imageData  = &vanarr;
+
+    uint8_t x = 16,y = 16;
 
     myMap.posX = 16;
     myMap.posY = 16;
@@ -485,11 +586,33 @@ int main(void)
         keyCommands(&key, &bossEnable);
         key = '\0';
 
+            if(encounter == 3){
+                //enter battle
+            }
+            else if (encounter == 2) {
+                uint8_t foundWild = (rand() % 8 == 4); //10 % change to encounter wild pokemon
+                if(foundWild){
+                    info.isInBattle = 1;
+                    bgcolor(0);
+                    inverse(0);
+                    clearTermninal();
+                    //fadeInEnemy(&lamparr);
+                }
+            }
 
-
+        }
+        else if(bossEnable){
+            keyCommands(&key, &bossEnable);
+        }
+        else{
+            gotoxy(0,0);
+            printf("battle!");
+            printSubImage(&lamp, 0, 0, lamp.width, lamp.heigth, 25, 3);
+            printSubImage(&van, 0, 0, van.width, van.heigth, 2, 30);
+            drawHealth("Van", 5, 5, &hp);
+        }
 
 
         gotoxy(0,0);
     }
 }
-
