@@ -221,7 +221,7 @@ void updateRadio(char* toPrint, uint8_t* buf){
     sprintFixed(freq, freqstr);
 
     sprintf(toPrint,"FM: %s MHz \n %d \n", freqstr, (vol >> 16));
-    lcd_write_string(buf, toPrint, 0,0);
+    lcd_write_string(buf, toPrint, 0,0, 0);
     lcd_push_buffer(buf);
 
     if (90 << 16 > freq && freq > 88 << 16)

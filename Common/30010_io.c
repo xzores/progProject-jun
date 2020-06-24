@@ -188,20 +188,29 @@ void lcd_push_buffer(uint8_t* buffer)
     }
 }
 
-void setCharHelper(uint8_t* buf, uint8_t charIndex, uint16_t position){
+void setCharHelper(uint8_t* buf, uint8_t charIndex, uint16_t position, uint8_t inverse){
 
     char* c = &character_data[charIndex][0];
     memcpy(buf + position, c, 5 * sizeof(char)); // Sets first element to some char
+
+    if(inverse){
+        buf[position] = ~buf[position];
+        buf[position+1] = ~buf[position+1];
+        buf[position+2] = ~buf[position+2];
+        buf[position+3] = ~buf[position+3];
+        buf[position+4] = ~buf[position+4];
+
+    }
 }
 
 #define INTER_BUF_LENGTH 128*2
 #define DISP_LENGTH 128
 
-void setChar(uint8_t* buf, char c, uint8_t x, uint8_t y){
+void setChar(uint8_t* buf, char c, uint8_t x, uint8_t y, uint8_t inverse){
 
     uint16_t p = x * 5 + INTER_BUF_LENGTH * y;
     uint8_t index = (uint8_t) c - 32;
-    setCharHelper(buf, index, p);
+    setCharHelper(buf, index, p, inverse);
 }
 
 void lcd_graphics_buffer(uint8_t* buf, uint16_t bufsize)
@@ -209,13 +218,13 @@ void lcd_graphics_buffer(uint8_t* buf, uint16_t bufsize)
     memset(buf,0x00,bufsize); // Sets each element of the buffer to 0xAA
 }
 
-void lcd_write_string(uint8_t* buf, const char* toPrint, uint8_t x, uint8_t y)
+void lcd_write_string(uint8_t* buf, const char* toPrint, uint8_t x, uint8_t y, uint8_t inverse)
 {
     int i = 0;
 
     while(toPrint[i] != '\0'){
         char c = toPrint[i];
-        setChar(buf, c, x + i, y);
+        setChar(buf, c, x + i, y, inverse);
         i++;
     }
 }

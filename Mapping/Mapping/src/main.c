@@ -16,10 +16,28 @@
 #include "30010_io.h"
 #include "Utility.h"
 #include <string.h>
+#include "Radio.h"
+
+#define DO_NOTHING 0
+#define FRONTAL_ATTACK 1
+#define REVERSE_ATTACK 2
+#define TURN 3
+#define HORN 4
+#define FLEE 5
+
+struct time{
+uint8_t h;
+uint8_t s;
+uint8_t m;
+uint8_t H;
+} time;
+
+struct time timer16;
 
 struct Map{
 
     uint8_t* buffer;
+
     uint16_t mySize;
     char style[4][3];
     uint8_t colors[4], posX, posY;
@@ -39,7 +57,6 @@ void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, i
                     } else {
                     *z = pos + (Size / 2) - b; //Hvis boksen g�r ud over vinduet
                     }
-
         }
 
         if (b >= pos) { // Boksen starter i 1. eller 4. kvadrant
@@ -56,9 +73,9 @@ void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, i
             *z = bSize - (pos - (Size / 2) - b);
         }
     }
-    /*
-    *s = MAX(0, MIN(Size - 1, *s));
-    *z = MAX(0, MIN(Size - 1, *z)); */
+
+    *s = MAX(0, MIN(Size, *s));
+    *z = MAX(0, MIN(Size, *z));
 }
 
 struct Player{
@@ -97,8 +114,12 @@ void buildMap(struct Map* myMap, uint16_t bx, uint16_t by, uint16_t sizeX, uint1
             for (j = ys; j < ys + yz; j++) {
                 uint8_t shiftIndex = (i % 4) * 2;
                 uint16_t index = i / 4;
-                myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize] &= ~(0x3 << shiftIndex); //tile resettes //index % myMap->mySize er altid lig index ??
-                myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize] |= (type << shiftIndex);
+
+                if(j > myMap->mySize || i > myMap->mySize)
+                    continue;
+
+                myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize / 4 ] &= ~(0x3 << shiftIndex); //tile resettes //index % myMap->mySize er altid lig index ??
+                myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize / 4 ] |= (type << shiftIndex);
             }
         }
     }
@@ -116,8 +137,11 @@ uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
     myScheme = default_visual;
 
     if (style == 0) { //Road, BG White, inv Off
-        myScheme.digit1 = '3';
+        myScheme.digit1 = '4';
         myScheme.digit2 = '7';
+        myScheme.digit3 = '3';
+        myScheme.digit4 = '0';
+        myScheme.inv = 0;
 
     } else if (style == 1) { //Wall, FG 90, BG, 40, INV ON
         myScheme.digit1 = '9';
@@ -172,10 +196,11 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
 
     for (j = 0; j < myMap->mySize; j++) {
         t = 0;
+        uint8_t lastTile = 0;
 
         for (i = 0; i < myMap->mySize / 4; i++){
 
-            uint8_t data = myMap->buffer[j * myMap->mySize + i];
+            uint8_t data = myMap->buffer[j * myMap->mySize / 4 + i];
 
             uint8_t d1, d2, d3, d4;
             d1 = (data & (3 << 0)) >> 0;
@@ -183,7 +208,11 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
             d3 = (data & (3 << 4)) >> 4;
             d4 = (data & (3 << 6)) >> 6;
 
-            uint8_t r = rand() % 3;
+            uint16_t posX = myMap->posX + i * 4;
+            uint16_t posY = myMap->posY + j;
+            uint16_t b = (posX * 5) % 231 + posY % 51;
+            srand(b);
+            uint16_t r = rand() % 3;
 
             t = tileScheme(&toPrint, t, d1); //ESC-codes tilføjes til toPrint, t opdateres
             if(i == 4 && j == 16)
@@ -200,12 +229,24 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
             if (d2 != d1)
             t = tileScheme(&toPrint, t, d2);
             toPrint[t++] = myMap->style[d2][r];
+
+            posX++;
+            b = (posX * 5) % 231 + posY % 51;
+            srand(b);
+            r = rand() % 3;
+
             if (d3 != d2)
             t = tileScheme(&toPrint, t, d3);
             toPrint[t++] = myMap->style[d3][r];
+
+            posX++;
+            b = (posX * 5) % 231 + posY % 51;
+            srand(b);
+            r = rand() % 3;
+
             if (d4 != d3)
-            t = tileScheme(&toPrint, t, d4);
-            toPrint[t++] = myMap->style[d4][r];
+                t = tileScheme(&toPrint, t, d4);
+                toPrint[t++] = myMap->style[d4][r];
         }
 
         toPrint[t++] = '\n';
@@ -214,8 +255,6 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
         printf(toPrint);
     };
 }
-
-
 
 void builds(struct Map * myMap) {
     //Gr�s-l�rred
@@ -362,6 +401,13 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 230, 112, 18, 5, 'W');
     buildMap(myMap, 225, 115, 6, 5, 'W');
 
+
+
+
+
+
+
+
     /*buildMap(myMap, 0, 0, 5, 10, 'G');
     buildMap(myMap, 5, 0, 4, 10, 'R');
     buildMap(myMap, 9, 0, 10, 10, 'G');
@@ -370,17 +416,38 @@ void builds(struct Map * myMap) {
 
 
 
-void motion(struct Map * myMap, char key) {
+uint8_t motion(struct Map* myMap, char key) {
 
-    if (key == 'w' && myMap->posY > 15) { //kør nord
+    uint8_t m = myMap->mySize / 2 - 1;
+    uint8_t ret = -1;
+
+    //NÃ¦ste tile
+    uint8_t indexN = 127 - (myMap->mySize / 8) + 1;
+    uint8_t indexS = 127 + (myMap->mySize / 8) + (myMap->mySize / 4) + 1;
+    uint8_t indexE = 127 + (myMap->mySize / 8) + 1;
+    uint8_t indexW = 127 + (myMap->mySize / 8);
+    uint8_t nextN = myMap->buffer[indexN] & 0x3; // next north
+    uint8_t nextS = myMap->buffer[indexS] & 0x3; //next south
+    uint8_t nextE = (myMap->buffer[indexE] & (0x3 << 2)) >> 2; //next east
+    uint8_t nextW = (myMap->buffer[indexW] & (0x3 << 6)) >> 6; //next West
+
+
+
+    if (key == 'w' && myMap->posY > m && nextN != 1) { //kÃ¸r nord
         myMap->posY--;
-    } else if (key == 's' && myMap->posY < 127 - 15) { //kør syd
+        ret = nextN;
+    } else if (key == 's' && myMap->posY < 127 - m && nextS != 1) { //kÃ¸r syd
         myMap->posY++;
-    } else if (key == 'a' && myMap->posX > 15) { // kør vest
+        ret = nextS;
+    } else if (key == 'a' && myMap->posX > m && nextW != 1) { // kÃ¸r vest
         myMap->posX--;
-    } else if (key == 'd' && myMap->posY < 255 - 15) { // kør øst
+        ret = nextE;
+    } else if (key == 'd' && myMap->posX < 255 - m && nextE != 1) { // kÃ¸r Ã¸st
         myMap->posX++;
+        ret = nextW;
     }
+
+    return ret;
 
 }
 
@@ -398,20 +465,20 @@ void keyCommands(char * key, uint8_t * bEnable) {
 void bossKey(char * key) {
     gotoxy(0,0);
     bgcolor(0);
+    gotoxy(8,16);
+    printf("business emails");
+
     clearTermninal();
     blink(1);
     gotoxy(8,15);
     printf("Sending important");
-    gotoxy(8,16);
-    printf("business emails");
-
 }
-
 
 struct GlobalInfo {
     uint8_t isInBattle;
     uint8_t battingType; //0 = nobattle, 1 = standart lygtepel, 2 = wild, 3 = super....
-}
+
+};
 
 struct Image {
 
@@ -455,39 +522,170 @@ void fadeInEnemy(struct Image* img){
 }
 
 
-void lcd_battle(uint8_t* buf, uint8_t hoverPosition){
+void lcd_battle(uint8_t* buf, uint8_t* dir, uint8_t hoverPosition){
 
-    //buf
+
+    if(*dir)
+        lcd_write_string(buf, "   Reverse   ", 0, 0, hoverPosition == 0);
+    else {
+        lcd_write_string(buf, "   Frontal   ", 0, 0, hoverPosition == 0);
+    }
+    lcd_write_string(buf, "   3ptar?  ", 13, 0, hoverPosition == 1);
+    lcd_write_string(buf, "   HOORN!   ", 0, 1,  hoverPosition == 2);
+    lcd_write_string(buf, "   Flee..   ", 13, 1, hoverPosition == 3);
 
 }
 
-void drawHealth(char * fighter, uint8_t x, uint8_t y, uint8_t * hp) {
+struct Fighter{
+    uint8_t hp;
+    char* name;
+};
 
-    window(4,4,10,8,'A',fighter);
+void drawHealth(struct Fighter* fighter, uint8_t x, uint8_t y) {
+    uint8_t color;
+    if (fighter->hp > 170) {
+        color = 42;
+    } else if (fighter->hp > 80)
+    {
+        color = 103;
+    }
+    else{
+        color = 41;
+    }
+
+    printf("%c[%dm", 27, 40); //red
+    window(y-2,x-2,2,17,'A',fighter->name);
     gotoxy(x,y);
-    uint8_t boxes = *hp / 28 + 1;
-    printf("\e[41m");
+    uint8_t boxes = fighter->hp >> 3 + 1; //divide by 16
+    printf("%c[%dm", 27, color); //red
     for (uint8_t i = 0; i < boxes; i++) {
-        printf(' ');
+        printf(" ");
+    }
+    printf("%c[%dm", 27, 40); //black
+    for (uint8_t i = 0; i < (16 - boxes); i++) {
+        printf(" ");
     }
 
 }
 
+void initTimer16() {
+    //Opsætning af timer---------------------------
+    RCC->APB2ENR |= RCC_APB2Periph_TIM16; //Enable Clockline to timer 16.
+    TIM16->CR1 = 0x01; //Timer enabled, all other bits disabled
+    TIM16->ARR = 0xFF; //Reload value sat til 256-1.
+    TIM16->PSC = 0x9C3; //Prescale sat til 2500-1 (maximum) (-1 pga formel)
+    //Interrupts------------------------
+    TIM16->DIER |= 0x0001; //Enable Timer 2 Interrupts
+    NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 0x0); //Set Interrupt Priority
+    NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn); //Enable interrupt
+}
+
+
+//return 0 if do nothing, 1 to frontal attack, 2 to reverse attack, 3 to turn, 4 to horn, 5 to flee
+uint8_t updateHoverPosition(uint8_t* currentHover, uint8_t* dir) {
+    uint8_t val = readJoystick();
+    uint8_t center = (val & 16) != 0;
+
+    uint8_t ret = DO_NOTHING;
+
+    if (*currentHover == 0) {
+        if ((val & 0x8) != 0) { //right
+            *currentHover = 1;
+        } else if ((val & 0x2) != 0) { //down
+            *currentHover = 2;
+        }
+
+        if(center){
+            if(*dir)
+                ret = REVERSE_ATTACK;
+            else
+                ret = FRONTAL_ATTACK;
+        }
+    }
+
+    else if (*currentHover == 1) {
+        if ((val & 0x4) != 0) { //left
+            *currentHover = 0;
+        } else if ((val & 0x2) != 0) { // down
+            *currentHover = 3;
+        }
+
+        if(center){
+            ret = TURN;
+        }
+    }
+
+    else if (*currentHover == 2) {
+        if ((val & 0x1) != 0) { //up
+            *currentHover = 0;
+        } else if ((val & 0x8) != 0) { //right
+            *currentHover = 3;
+        }
+
+
+        if(center){
+            ret = HORN;
+        }
+    }
+
+     else if (*currentHover == 3) {
+        if ((val & 0x1) != 0) { //up
+            *currentHover = 1;
+        } else if ((val & 0x4) != 0) { //left
+            *currentHover = 2;
+
+        }
+
+        if(center){
+            ret = FLEE;
+        }
+    }
+
+    return ret;
+}
+
+
+
+
 int main(void)
 {
-    srand(10321);
+    struct GlobalInfo info = {0, 0};
 
-    uart_init(115200);
+    uart_init(515200);
     homeCurser(); //Sæt curser til 0,0
     clearTermninal(); // Ryd terminal
     //struct Map myMap = {malloc(50 * 50 * sizeof(uint8_t)), 50, {{0xB0,0xB0,0xB0},  {0xDB,0xDB,0xDB}, {0xB3,0xDD,0xEF}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}};
-    struct Map myMap = {malloc(8 * 32 * sizeof(uint8_t)), 32, {{0xDB,0xDB,0xDB},  {0xB2,0xB2,0xB2}, {0xF7,0xF7,0xF7}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
+    struct Map myMap = {malloc(8 * 33 * sizeof(uint8_t)), 32, {{' ',' ',' '},  {0xB2,0xB2,0xB2}, {',',' ','"'}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
 
     //memset(myMap.buffer, 0x00, 128 * 256);
 
-    uint8_t hp = 255;
+    uint8_t dir = 0; //0 = front, 1 = back
     struct Image lamp ={0, 8, 24};
     struct Image van = {0,24,10};
+    uint16_t score = 0;
+
+    //setup joystick
+    {
+    RCC->AHBENR |= RCC_AHBPeriph_GPIOA; //Enabling clock for IO Port A
+    RCC->AHBENR |= RCC_AHBPeriph_GPIOB;
+    RCC->AHBENR |= RCC_AHBPeriph_GPIOC;
+    RCC->AHBENR |= RCC_AHBPeriph_GPIOD;
+
+    setPortMode(RIGHT_JOY_STICK, IN_MODE); //Porten RJS er forbundet til s�ttes til input-mode.
+    setPortPuPd(RIGHT_JOY_STICK, NO_PULL); //Porten er forbundet til 1/0 i hardware, det er ikke n�dvendigt med pull ?? Anders
+
+    setPortMode(UP_JOY_STICK, IN_MODE);
+    setPortPuPd(UP_JOY_STICK, NO_PULL);
+
+    setPortMode(CENTER_JOY_STICK, IN_MODE);
+    setPortPuPd(CENTER_JOY_STICK, NO_PULL);
+
+    setPortMode(LEFT_JOY_STICK, IN_MODE);
+    setPortPuPd(LEFT_JOY_STICK, NO_PULL);
+
+    setPortMode(DOWN_JOY_STICK, IN_MODE);
+    setPortPuPd(DOWN_JOY_STICK, NO_PULL);
+    }
 
     uint8_t lamparr[] = {
                         0,0,1,1,1,1,0,0,
@@ -531,65 +729,125 @@ int main(void)
 
     lamp.imageData  = &lamparr;
     van.imageData  = &vanarr;
-
-    uint8_t x = 16,y = 16;
-
     myMap.posX = 16;
     myMap.posY = 16;
     char key;
     char nextKey;
     uint8_t bossEnable = 0;
+    char radioToPrint[256];
+    uint8_t buf[512];
+    lcd_graphics_buffer(buf, 512);
+    uint8_t hoverPosition = 0;
+    uint8_t lastReadJoy = 0;
+    setupRadio(radioToPrint);
+
+    struct Fighter vanFighter = {150, "Van "};
+    struct Fighter currentEnemy = {0, ""};
+
+
+    //builds(&myMap, posX, posY,);
 
     while(1)
     {
+        uint8_t encounter = 0;
         nextKey = uart_get_char();
         uart_clear();
         if (nextKey != '\0') {
-            if (nextKey == 'b') {
-            bossEnable = !bossEnable;
-            key = 'b';
-            } else {
+            if (nextKey == 'b')
+                bossEnable = !bossEnable;
+
             key = nextKey;
-            }
         }
 
+        if(!info.isInBattle && !bossEnable){
+            builds(&myMap);
 
-        builds(&myMap);
+            updateRadio(radioToPrint, buf);
 
-        if (!bossEnable) {
-        printSubMap(&myMap, 0,0, 32,32);
-        motion(&myMap, key);
-        }
 
-        keyCommands(&key, &bossEnable);
-        key = '\0';
+            printSubMap(&myMap, 0,0, 32,32);
+            encounter = motion(&myMap, key);
 
             if(encounter == 3){
                 //enter battle
             }
             else if (encounter == 2) {
-                uint8_t foundWild = (rand() % 8 == 4); //10 % change to encounter wild pokemon
+                uint8_t foundWild = (rand() % 2 == 1); //10 % change to encounter wild pokemon
                 if(foundWild){
                     info.isInBattle = 1;
                     bgcolor(0);
                     inverse(0);
+                    currentEnemy.hp = 255;
+                    currentEnemy.name = "lamppost";
                     clearTermninal();
+                    lcd_graphics_buffer(buf, 512);
                     //fadeInEnemy(&lamparr);
                 }
             }
 
         }
         else if(bossEnable){
+
+            updateRadio(radioToPrint, buf);
             keyCommands(&key, &bossEnable);
+
         }
         else{
             gotoxy(0,0);
-            printf("battle!");
             printSubImage(&lamp, 0, 0, lamp.width, lamp.heigth, 25, 3);
             printSubImage(&van, 0, 0, van.width, van.heigth, 2, 30);
-            drawHealth("Van", 5, 5, &hp);
+            drawHealth(&currentEnemy, 6, 10);
+            drawHealth(&vanFighter, 30, 35);
+            uint8_t action = DO_NOTHING;
+
+            lcd_battle(&buf, &dir, hoverPosition);
+            lcd_push_buffer(&buf);
+
+            if(readJoystick() != lastReadJoy){
+                action = updateHoverPosition(&hoverPosition, &dir);
+                lastReadJoy = readJoystick();
+            }
+
+            if(action == FRONTAL_ATTACK){
+                uint8_t dmg = 20 + rand() % 10;
+
+                if(dmg > currentEnemy.hp){
+                    info.isInBattle = 0;
+                    clearTermninal();
+                    lcd_graphics_buffer(buf, 512);
+                    lcd_push_buffer(buf);
+                    score++;
+                }
+
+                currentEnemy.hp -= dmg;
+
+            }
+            else if(action == REVERSE_ATTACK){
+                uint8_t dmg = 30 + rand() % 20;
+
+                if(dmg > currentEnemy.hp){
+                    info.isInBattle = 0;
+                    clearTermninal();
+                    lcd_graphics_buffer(buf, 512);
+                    lcd_push_buffer(buf);
+                    score++;
+                }
+
+                currentEnemy.hp -= dmg;
+
+            }
+            else if(action == TURN)
+                dir = !dir;
+            else if(action == FLEE){
+                vanFighter.hp -= 20;
+                info.isInBattle = 0;
+                lcd_graphics_buffer(buf, 512);
+                lcd_push_buffer(buf);
+                clearTermninal();
+            }
         }
 
+        key = '\0';
 
         gotoxy(0,0);
     }
