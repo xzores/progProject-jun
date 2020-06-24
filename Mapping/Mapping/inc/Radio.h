@@ -7,3 +7,6 @@
 
 void updateRadio(char* toPrint, uint8_t* buf);
 void setupRadio(char* toPrint);
+uint32_t getTimer15Cnt();
+void resetTimer15Cnt();
+void battleMusic();

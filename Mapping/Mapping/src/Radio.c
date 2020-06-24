@@ -66,7 +66,7 @@ void configT15(uint16_t BPM)
     TIM15->PSC = 2499; // Set pre-scaler value
     TIM15->DIER |= 0x0001; // Enable timer interrupt
 
-    NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 0);
+    NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 5);
     NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn);
 
     TIM15->CR1 |= 0x0001; // Enable timer
@@ -99,6 +99,21 @@ static volatile uint16_t notes3[]= {659, 82, 493, 523, 587, 82, 523, 493, 440, 1
 523, 659, 65, 587, 523, 493, 49, 493, 523, 587, 103, 659, 103, 523, 110, 440, 110, 440, 55, 110, 220};
 
 
+//Pokemon Fight----------------------------------------------------------------------------------------------------------
+static volatile uint16_t notes4[]= {246, 233, 220, 207, 233, 220, 207, 196, 220, 207, 196, 185, 207, 196, 185, 174, 196, 185,
+174, 164, 185, 174, 164, 155, 174, 164, 155, 146, 164, 155, 146, 138, 493, 123, 123, 123, 146, 146, 164, 164, 123, 123,
+174, 174, 349, 164, 146, 146, 293, 123, 329, 123, 146, 146, 349, 164, 123, 123, 146, 146, 261, 110, 130, 130,
+493, 123, 123, 123, 146, 146, 164, 164, 123, 123, 174, 174, 349, 164, 146, 146, 293, 329, 123, 123, 146, 146, 349, 164,
+123, 123, 146, 146, 261, 110, 130, 130, 493, 123, 123, 123, 146, 146, 164, 164, 123, 123,
+174, 174, 349, 164, 146, 146, 293, 123, 329, 123, 146, 146, 164, 164, 123, 123, 261, 146, 440, 110, 130, 130,
+493, 123, 123, 123, 146, 146, 164, 164, 123, 123, 174, 174, 349, 164, 146, 146, 293, 123, 329, 123, 146, 146, 349, 164,
+123, 123, 146, 146, 261, 110, 130, 130, 123, 123, 185, 185, 123, 123, 185, 185, 123, 123, 185, 185, 123, 123,
+185, 185, 123, 123, 185, 185, 123, 123, 185, 185, 123, 123, 185, 185, 123, 123, 185, 185, 130, 130, 196, 196, 130, 130,
+196, 196, 130, 130, 196, 196, 130, 130, 196, 196, 130, 130, 196, 196, 130, 130, 196, 196, 130, 130, 196, 196, 130, 130, 196, 196,
+123, 123, 185, 185, 123, 123, 185, 185, 123, 123, 185, 185, 123, 123, 185, 185, 123, 123, 185, 185, 123, 123, 185, 185, 123, 123,
+185, 185, 123, 123, 185, 185, 110, 110, 164, 164, 110, 110, 164, 164, 110, 110, 164, 164, 110, 110, 164, 164, 110, 110, 164, 164,
+110, 110, 164, 164, 110, 110, 164, 164, 110, 110, 164, 164};
+
 //-----------------------------------------------------------------------------------------------------------------------
 
 //Pokemon Fight----------------------------------------------------------------------------------------------------------
@@ -106,12 +121,18 @@ static volatile uint16_t notes3[]= {659, 82, 493, 523, 587, 82, 523, 493, 440, 1
 
 
 //Array of the songs for the radio-----------------------------------------------------------------------------------------------------------
-static volatile uint32_t radio[] = {notes,notes2,notes3};
-static volatile uint16_t radioSizes[] = {sizeof(notes), sizeof(notes2), sizeof(notes3)};
+static volatile uint32_t radio[] = {notes,notes2,notes3, notes4};
+static volatile uint16_t radioSizes[] = {sizeof(notes), sizeof(notes2), sizeof(notes3), sizeof(notes4)};
 static uint8_t station = 0;
+static volatile uint32_t timer15Cnt = 0;
 //-----------------------------------------------------------------------------------------------------------------------
 
+
+
 void TIM1_BRK_TIM15_IRQHandler (void){
+
+    timer15Cnt += TIM15->ARR / 256;
+
     if(station == 255){
         //srand(f);
         //setFreq(20 + rand() % 4000);
@@ -124,6 +145,16 @@ void TIM1_BRK_TIM15_IRQHandler (void){
         setFreq(a[f]);
     }
     TIM15->SR &= ~0x0001; //Clear interrupt bit
+
+
+}
+
+uint32_t getTimer15Cnt(){
+    return timer15Cnt;
+}
+
+void resetTimer15Cnt(){
+    timer15Cnt = 0;
 }
 
 
@@ -154,16 +185,6 @@ uint32_t convert(uint32_t val)
     return val << 12;
 }
 
-uint32_t multiplyFix(uint32_t a, uint32_t b){
-
-    return a * b;
-}
-
-uint32_t divideFix(uint32_t a, uint32_t b){
-
-    return a / b;
-}
-
 uint32_t remap(uint32_t low1, uint32_t high1, uint32_t low2, uint32_t high2, uint32_t val)
 {
 
@@ -176,12 +197,12 @@ uint32_t remap(uint32_t low1, uint32_t high1, uint32_t low2, uint32_t high2, uin
 
 void sprintFixed(uint32_t i, char* str){
  // Prints a signed 16.16 fixed point number
- if ((i & 0x80000000) != 0) { // Handle negative numbers
- sprintf(str, "-");
- i = ~i + 1;
- }
- sprintf(str,"%ld.%02ld\n", i >> 16, 10000 * (uint32_t)(i & 0xFFFF) >> 16);
- // Print a maximum of 4 decimal digits to avoid overflow
+    if ((i & 0x80000000) != 0) { // Handle negative numbers
+        sprintf(str, "-");
+        i = ~i + 1;
+    }
+    sprintf(str,"%d.%02d", i >> 16, 10000 * (uint32_t)(i & 0xFFFF) >> 16);
+    // Print a maximum of 4 decimal digits to avoid overflow
 }
 
 
@@ -199,6 +220,7 @@ void setupRadio(char* toPrint){
     configT2();
     configCount();
 
+    configT15(240);
     setFreq(100);
 
     //potmetersjov-----------------------------------------------------
@@ -211,17 +233,25 @@ void setupRadio(char* toPrint){
 }
 
 
+//used every frame, moved to global for speed up
+static char freqstr[30];
+
+void battleMusic() {
+    configT15(550);
+    station = 3;
+}
 
 void updateRadio(char* toPrint, uint8_t* buf){
 
     uint32_t freq = remap(0, 256 << 16, 87 << 16, 108 << 16, convert(readAdc1())); // convert(readAdc1()); //remap(0, 256, 40, 2000, convert(readAdc1()));
     uint32_t vol = remap(0, 256 << 16, 0, 100 << 16, convert(readAdc2())); //convert(readAdc2()); //remap(0, 256, 0, 100, convert(readAdc2()));
-    char freqstr[20];
 
     sprintFixed(freq, freqstr);
 
-    sprintf(toPrint,"FM: %s MHz \n %d \n", freqstr, (vol >> 16));
+    sprintf(toPrint,"FM: %s MHz", freqstr);
     lcd_write_string(buf, toPrint, 0,0, 0);
+    sprintf(toPrint,"Vol: %d sound unit", (vol >> 16));
+    lcd_write_string(buf, toPrint, 0,1, 0);
     lcd_push_buffer(buf);
 
     if (90 << 16 > freq && freq > 88 << 16)

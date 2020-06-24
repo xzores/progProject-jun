@@ -25,14 +25,13 @@
 #define HORN 4
 #define FLEE 5
 
-struct time{
-uint8_t h;
-uint8_t s;
-uint8_t m;
-uint8_t H;
-} time;
 
-struct time timer16;
+
+uint8_t* posXHPBOOZT;
+uint8_t* posYHPBOOZT;
+uint8_t* bOOZTuSED;
+
+
 
 struct Map{
 
@@ -414,9 +413,20 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 10, 1, 8, 8, 'W'); */
 }
 
+void takeHeart(uint8_t* hp, uint8_t x, uint8_t y){
 
+    *hp = 255;
 
-uint8_t motion(struct Map* myMap, char key) {
+    for(int i = 0; i < 100; i++){
+
+        if(x == posXHPBOOZT[i] && y == posYHPBOOZT[i]){
+            bOOZTuSED[i] = 1;
+        }
+    }
+
+}
+
+uint8_t motion(struct Map* myMap, char key, uint8_t* hp) {
 
     uint8_t m = myMap->mySize / 2 - 1;
     uint8_t ret = -1;
@@ -431,24 +441,51 @@ uint8_t motion(struct Map* myMap, char key) {
     uint8_t nextE = (myMap->buffer[indexE] & (0x3 << 2)) >> 2; //next east
     uint8_t nextW = (myMap->buffer[indexW] & (0x3 << 6)) >> 6; //next West
 
+    //this tile
 
 
-    if (key == 'w' && myMap->posY > m && nextN != 1) { //kÃ¸r nord
-        myMap->posY--;
-        ret = nextN;
-    } else if (key == 's' && myMap->posY < 127 - m && nextS != 1) { //kÃ¸r syd
-        myMap->posY++;
-        ret = nextS;
-    } else if (key == 'a' && myMap->posX > m && nextW != 1) { // kÃ¸r vest
-        myMap->posX--;
-        ret = nextE;
-    } else if (key == 'd' && myMap->posX < 255 - m && nextE != 1) { // kÃ¸r Ã¸st
-        myMap->posX++;
-        ret = nextW;
+    if (key == 'w') {
+        if(myMap->posY > m && nextN == 3){ //kÃ¸r nord
+            myMap->posY--;
+            ret = nextN;
+            takeHeart(hp, myMap->posX, myMap->posY);
+        }
+        else if(myMap->posY > m && nextN != 1){
+            myMap->posY--;
+            ret = nextN;
+        }
+    } else if (key == 's') {
+
+        if (myMap->posY < 127 - m && nextS == 3) { //kÃ¸r syd
+            myMap->posY++;
+            ret = nextS;
+            takeHeart(hp, myMap->posX, myMap->posY);
+        } else if(myMap->posY < 127 - m && nextS != 1){
+            myMap->posY++;
+            ret = nextS;
+        }
+    }
+    else if (key == 'a') {
+        if (myMap->posX > m && nextW == 3) { // kÃ¸r vest
+            myMap->posX--;
+            ret = nextE;
+            takeHeart(hp, myMap->posX, myMap->posY);
+        } else if ((myMap->posX > m && nextW != 1) ) {
+            myMap->posX--;
+            ret = nextE;
+        }
+    } else if (key == 'd') {
+        if(myMap->posX < 255 - m && nextE == 3) { // kÃ¸r Ã¸st
+            myMap->posX++;
+            ret = nextW;
+            takeHeart(hp, myMap->posX, myMap->posY);
+        } else if (myMap->posX < 255 - m && nextE != 1) {
+            myMap->posX++;
+            ret = nextW;
+        }
     }
 
     return ret;
-
 }
 
 void keyCommands(char * key, uint8_t * bEnable) {
@@ -476,7 +513,8 @@ void bossKey(char * key) {
 
 struct GlobalInfo {
     uint8_t isInBattle;
-    uint8_t battingType; //0 = nobattle, 1 = standart lygtepel, 2 = wild, 3 = super....
+    uint8_t battingType;//0 = nobattle, 1 = standart lygtepel, 2 = wild, 3 = super....
+    uint8_t gameOver;
 
 };
 
@@ -531,8 +569,8 @@ void lcd_battle(uint8_t* buf, uint8_t* dir, uint8_t hoverPosition){
         lcd_write_string(buf, "   Frontal   ", 0, 0, hoverPosition == 0);
     }
     lcd_write_string(buf, "   3ptar?  ", 13, 0, hoverPosition == 1);
-    lcd_write_string(buf, "   HOORN!   ", 0, 1,  hoverPosition == 2);
-    lcd_write_string(buf, "   Flee..   ", 13, 1, hoverPosition == 3);
+    lcd_write_string(buf, "   HOORN!   ", 0, 2,  hoverPosition == 2);
+    lcd_write_string(buf, "   Flee..   ", 13, 2, hoverPosition == 3);
 
 }
 
@@ -568,18 +606,16 @@ void drawHealth(struct Fighter* fighter, uint8_t x, uint8_t y) {
 
 }
 
-void initTimer16() {
-    //Opsætning af timer---------------------------
-    RCC->APB2ENR |= RCC_APB2Periph_TIM16; //Enable Clockline to timer 16.
-    TIM16->CR1 = 0x01; //Timer enabled, all other bits disabled
-    TIM16->ARR = 0xFF; //Reload value sat til 256-1.
-    TIM16->PSC = 0x9C3; //Prescale sat til 2500-1 (maximum) (-1 pga formel)
-    //Interrupts------------------------
-    TIM16->DIER |= 0x0001; //Enable Timer 2 Interrupts
-    NVIC_SetPriority(TIM1_UP_TIM16_IRQn, 0x0); //Set Interrupt Priority
-    NVIC_EnableIRQ(TIM1_UP_TIM16_IRQn); //Enable interrupt
-}
 
+void placeHearts(struct Map * myMap) {
+
+    for (uint8_t i = 0; i < 100; i++) {
+        if(!bOOZTuSED[i])
+            buildMap(myMap, posXHPBOOZT[i], posYHPBOOZT[i], 1, 1, 'H');
+    }
+
+
+}
 
 //return 0 if do nothing, 1 to frontal attack, 2 to reverse attack, 3 to turn, 4 to horn, 5 to flee
 uint8_t updateHoverPosition(uint8_t* currentHover, uint8_t* dir) {
@@ -644,18 +680,41 @@ uint8_t updateHoverPosition(uint8_t* currentHover, uint8_t* dir) {
     return ret;
 }
 
+void GameOver(uint8_t* score, struct GlobalInfo* info) {
+    info->gameOver = 1;
+    info->isInBattle = 0;
+    clearTermninal();
+    gotoxy(16,8);
+    printf("GAME OVER\n               Your score was %d", *score);
 
+}
 
+void wait(uint32_t delay){
+    uint32_t cnt = 0;
+    uint32_t start = getTimer15Cnt();
+    while (cnt < start + delay) {
+        cnt = getTimer15Cnt();
+    }
+}
 
 int main(void)
 {
-    struct GlobalInfo info = {0, 0};
+    struct GlobalInfo info = {0, 0, 0};
 
     uart_init(515200);
     homeCurser(); //Sæt curser til 0,0
     clearTermninal(); // Ryd terminal
     //struct Map myMap = {malloc(50 * 50 * sizeof(uint8_t)), 50, {{0xB0,0xB0,0xB0},  {0xDB,0xDB,0xDB}, {0xB3,0xDD,0xEF}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}};
     struct Map myMap = {malloc(8 * 33 * sizeof(uint8_t)), 32, {{' ',' ',' '},  {0xB2,0xB2,0xB2}, {',',' ','"'}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
+
+    posXHPBOOZT = calloc(100, sizeof(uint8_t));
+    posYHPBOOZT = calloc(100, sizeof(uint8_t));
+    bOOZTuSED = calloc(100, sizeof(uint8_t));
+
+    for(int i = 0; i < 100; i++){
+        posXHPBOOZT[i] = rand() % 255;
+        posYHPBOOZT[i] = rand() % 127;
+    }
 
     //memset(myMap.buffer, 0x00, 128 * 256);
 
@@ -686,6 +745,8 @@ int main(void)
     setPortMode(DOWN_JOY_STICK, IN_MODE);
     setPortPuPd(DOWN_JOY_STICK, NO_PULL);
     }
+
+
 
     uint8_t lamparr[] = {
                         0,0,1,1,1,1,0,0,
@@ -739,16 +800,25 @@ int main(void)
     lcd_graphics_buffer(buf, 512);
     uint8_t hoverPosition = 0;
     uint8_t lastReadJoy = 0;
+    uint8_t turn = 0;
     setupRadio(radioToPrint);
 
     struct Fighter vanFighter = {150, "Van "};
     struct Fighter currentEnemy = {0, ""};
 
 
+    // TImer ---------------------------------
+   // initTimer3();
+
+
+    //-----------------------------------------
+
+
     //builds(&myMap, posX, posY,);
 
     while(1)
     {
+        inverse(0);
         uint8_t encounter = 0;
         nextKey = uart_get_char();
         uart_clear();
@@ -759,20 +829,23 @@ int main(void)
             key = nextKey;
         }
 
-        if(!info.isInBattle && !bossEnable){
+        if(!info.isInBattle && !info.gameOver && !bossEnable){
+            dir = 0;
             builds(&myMap);
+            placeHearts(&myMap);
 
             updateRadio(radioToPrint, buf);
 
 
             printSubMap(&myMap, 0,0, 32,32);
-            encounter = motion(&myMap, key);
+            encounter = motion(&myMap, key, &(vanFighter.hp));
 
             if(encounter == 3){
                 //enter battle
             }
             else if (encounter == 2) {
-                uint8_t foundWild = (rand() % 2 == 1); //10 % change to encounter wild pokemon
+                //srand();
+                uint8_t foundWild = (rand() % 20 == 7); //10 % change to encounter wild pokemon
                 if(foundWild){
                     info.isInBattle = 1;
                     bgcolor(0);
@@ -792,7 +865,8 @@ int main(void)
             keyCommands(&key, &bossEnable);
 
         }
-        else{
+        else if (info.gameOver != 1) {
+            battleMusic();
             gotoxy(0,0);
             printSubImage(&lamp, 0, 0, lamp.width, lamp.heigth, 25, 3);
             printSubImage(&van, 0, 0, van.width, van.heigth, 2, 30);
@@ -803,52 +877,95 @@ int main(void)
             lcd_battle(&buf, &dir, hoverPosition);
             lcd_push_buffer(&buf);
 
-            if(readJoystick() != lastReadJoy){
-                action = updateHoverPosition(&hoverPosition, &dir);
-                lastReadJoy = readJoystick();
-            }
+      /*----*/  if (turn == 0) {
 
-            if(action == FRONTAL_ATTACK){
-                uint8_t dmg = 20 + rand() % 10;
+                gotoxy(15,28);
+                clreol();
 
-                if(dmg > currentEnemy.hp){
-                    info.isInBattle = 0;
-                    clearTermninal();
-                    lcd_graphics_buffer(buf, 512);
-                    lcd_push_buffer(buf);
-                    score++;
+
+                if(readJoystick() != lastReadJoy){
+                    action = updateHoverPosition(&hoverPosition, &dir);
+                    lastReadJoy = readJoystick();
                 }
 
-                currentEnemy.hp -= dmg;
+                if(action == FRONTAL_ATTACK){
+                    uint8_t dmg = 20 + rand() % 10;
+                    turn = !turn;
 
-            }
-            else if(action == REVERSE_ATTACK){
-                uint8_t dmg = 30 + rand() % 20;
+                    if(dmg > currentEnemy.hp){
+                        info.isInBattle = 0;
+                        clearTermninal();
+                        lcd_graphics_buffer(buf, 512);
+                        lcd_push_buffer(buf);
+                        score++;
+                    }
 
-                if(dmg > currentEnemy.hp){
-                    info.isInBattle = 0;
-                    clearTermninal();
-                    lcd_graphics_buffer(buf, 512);
-                    lcd_push_buffer(buf);
-                    score++;
+                    currentEnemy.hp -= dmg;
+                    wait(100);
+                }
+                else if(action == REVERSE_ATTACK){
+                    uint8_t dmg = 30 + rand() % 20;
+                    turn = !turn;
+
+                    if(dmg > currentEnemy.hp){
+                        gotoxy(8,16);
+
+                        info.isInBattle = 0;
+                        clearTermninal();
+                        printf("Wild lamppost defeated!\n          You gained a point!");
+                        lcd_graphics_buffer(buf, 512);
+                        lcd_push_buffer(buf);
+                        score++;
+                    }
+
+                    currentEnemy.hp -= dmg;
+                    wait(200);
                 }
 
-                currentEnemy.hp -= dmg;
+                else if (action == HORN) {
+                    turn = !turn;
+                    wait(100);
+
+                }
+                else if(action == TURN) {
+                    dir = !dir;
+                    turn = !turn;
+                    wait(100);
+                }
+                else if(action == FLEE){
+
+                    info.isInBattle = 0;
+                    lcd_graphics_buffer(buf, 512);
+                    lcd_push_buffer(buf);
+                    clearTermninal();
+                    if (vanFighter.hp > 20) {
+                        vanFighter.hp -= 20;
+                    } else {
+                        GameOver(&score, &info);
+                    }
+                    wait(100);
+                }
+
 
             }
-            else if(action == TURN)
-                dir = !dir;
-            else if(action == FLEE){
-                vanFighter.hp -= 20;
-                info.isInBattle = 0;
-                lcd_graphics_buffer(buf, 512);
-                lcd_push_buffer(buf);
-                clearTermninal();
+            if (turn == 1 && info.isInBattle) {
+                turn = !turn;
+                gotoxy(15,28);
+                printf("Wild lamppost used 'blind'!");
+                uint8_t dmg = rand() % 20 + score * 2;
+
+                if (vanFighter.hp > dmg) {
+                    vanFighter.hp -= dmg;
+                } else {
+                    GameOver(&score, &info);
+                }
+                wait(100);
             }
+
         }
 
         key = '\0';
-
         gotoxy(0,0);
+
     }
 }
