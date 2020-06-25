@@ -1,6 +1,7 @@
 
 #include "Radio.h"
 
+//this part was by christoffer
 void io_config()
  {
     RCC->AHBENR |= RCC_AHBPeriph_GPIOA; // Enable clock for GPIO Port A
@@ -24,6 +25,7 @@ void io_config()
     while (!(ADC1->ISR & 0x00000001)); // Wait until ready
  }
 
+//this part was by christoffer
   uint16_t readAdc1()
   {
     //setPin(GPIOA, 0, 1);
@@ -34,6 +36,7 @@ void io_config()
     return ADC_GetConversionValue(ADC1); // Read the ADC value
 }
 
+//this part was by christoffer
 uint16_t readAdc2()
 {
     //setPin(GPIOA, 1, 1);
@@ -46,6 +49,7 @@ uint16_t readAdc2()
 
 }
 
+//this part was by christoffer
 void setFreq(uint32_t freq) {
     uint32_t v = readAdc2();
     uint32_t reload = 64e6 / freq / (9 + 1) - 1;
@@ -57,6 +61,7 @@ void setFreq(uint32_t freq) {
 
 }
 
+//all songs made by christoffer and jakob
 void configT15(uint16_t BPM)
 {
 
@@ -73,6 +78,8 @@ void configT15(uint16_t BPM)
 
 }
 
+
+//all songs made by christoffer
 //Coffin Dance------------------------------------------------------------------------------------------------
 static volatile uint16_t notes[] = {466, 466, 466, 466, 587, 587, 587, 587, 523, 523, 523, 523, 689, 689, 689,
 689, 783, 783, 783, 783, 783, 783, 783, 783, 783, 783, 783, 783, 523, 466, 440, 349, 392, 196, 196, 587, 523, 261,
@@ -128,7 +135,7 @@ static volatile uint32_t timer15Cnt = 0;
 //-----------------------------------------------------------------------------------------------------------------------
 
 
-
+//this part was by christoffer and jakob and anders
 void TIM1_BRK_TIM15_IRQHandler (void){
 
     timer15Cnt += TIM15->ARR / 256;
@@ -149,15 +156,17 @@ void TIM1_BRK_TIM15_IRQHandler (void){
 
 }
 
+//this part was by anders and jakob
 uint32_t getTimer15Cnt(){
     return timer15Cnt;
 }
 
+//this part was by anders
 void resetTimer15Cnt(){
     timer15Cnt = 0;
 }
 
-
+//this part was by christoffer
 void configT2()
 {
     RCC->APB1ENR |= 0x00000001; // Enable clock line to timer 2;
@@ -167,6 +176,7 @@ void configT2()
     TIM2->CR1 |= 0x0001; // Enable timer
 }
 
+//this part was by christoffer
 void configCount()
 {
     TIM2->CCER &= ~TIM_CCER_CC3P; // Clear CCER register
@@ -179,12 +189,14 @@ void configCount()
     TIM2->CCR3 = 500; // Set duty cycle to 50 %
 }
 
+//this was made by jakob
 //return 16.16 format mapped from 4096 to fixed point allmost 256
 uint32_t convert(uint32_t val)
 {
     return val << 12;
 }
 
+//this was made by jakob and chris
 uint32_t remap(uint32_t low1, uint32_t high1, uint32_t low2, uint32_t high2, uint32_t val)
 {
 
@@ -195,6 +207,7 @@ uint32_t remap(uint32_t low1, uint32_t high1, uint32_t low2, uint32_t high2, uin
     //return (low2 << 16) + ((val - (low1 << 16)) * (high2 - low2) << 16) / (high1 - low1) << 16;
 }
 
+//this was made by jakob s
 void sprintFixed(uint32_t i, char* str){
  // Prints a signed 16.16 fixed point number
     if ((i & 0x80000000) != 0) { // Handle negative numbers
@@ -206,6 +219,7 @@ void sprintFixed(uint32_t i, char* str){
 }
 
 
+//this was made by christoffer
 //setups the radio, to use with update radio function
 void setupRadio(char* toPrint){
     RCC->AHBENR |= RCC_AHBENR_GPIOBEN; // Enable clock line for GPIO bank B
@@ -236,11 +250,14 @@ void setupRadio(char* toPrint){
 //used every frame, moved to global for speed up
 static char freqstr[30];
 
+//this was made by jakob
 void battleMusic() {
     configT15(550);
     station = 3;
 }
 
+
+//this was made by christoffer (small modification by jakob)
 //should be called every frame
 void updateRadio(char* toPrint, uint8_t* buf){
 

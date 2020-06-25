@@ -25,13 +25,13 @@
 #define HORN 4
 #define FLEE 5
 
-
+//this part was made by jakob
 //used to store data about health packs
 uint8_t* posXHPBOOZT;
 uint8_t* posYHPBOOZT;
 uint8_t* bOOZTuSED;
 
-
+//this part was made by anders and jakob
 //map structure used for stong info about the player position and map tile data
 struct Map{
 
@@ -43,6 +43,7 @@ struct Map{
 
 };
 
+//this part was made by anders and jakob
 //helper function, used to check if what tiles should be printet to the tile buffer
 void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, int16_t* z, uint8_t* enableBuild){
 
@@ -78,6 +79,7 @@ void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, i
     *z = MAX(0, MIN(Size, *z));
 }
 
+//this part was made by anders
 //build the squre to the map
 void buildMap(struct Map* myMap, uint16_t bx, uint16_t by, uint16_t sizeX, uint16_t sizeY, char style) {
 
@@ -118,13 +120,13 @@ void buildMap(struct Map* myMap, uint16_t bx, uint16_t by, uint16_t sizeX, uint1
 
 }
 
-
+//this part was made by anders
 //helper strcut used in tileScheme
 struct visual{
     uint8_t digit1, digit2, digit3, digit4, inv;
 } default_visual = {'3','7','4','0',0}; //ESC[37m ESC[40m, reset to white foreground, black background, inv off
 
-
+//this part was made by anders
 //helper function used to print the color of a tile
 uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
     struct visual myScheme;
@@ -179,7 +181,7 @@ uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
     return t;
 }
 
-
+//this part was made by jakob and anders
 //prints a part of the map (aka the viewport) to the putty terminal
 void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t sizeY) {
 
@@ -249,6 +251,7 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
     };
 }
 
+//this part was made by anders
 //this stores the campus map as a list of sqaures, these are build each frame.
 void builds(struct Map * myMap) {
     //Gr�s-l�rred
@@ -397,6 +400,7 @@ void builds(struct Map * myMap) {
 
 }
 
+//this part was made by jakob
 void takeHeart(uint8_t* hp, uint8_t x, uint8_t y){
 
     //heals the player
@@ -412,7 +416,7 @@ void takeHeart(uint8_t* hp, uint8_t x, uint8_t y){
 
 }
 
-
+//this part was made by anders
 //this function takes the map and the pressed key and the vans hp as a pointer
 uint8_t motion(struct Map* myMap, char key, uint8_t* hp) {
 
@@ -474,6 +478,7 @@ uint8_t motion(struct Map* myMap, char key, uint8_t* hp) {
     return ret;
 }
 
+// this part was made by anders
 //blinks "sending important emils" on the screen
 void bossKey(char * key) {
     gotoxy(0,0);
@@ -486,6 +491,7 @@ void bossKey(char * key) {
     printf("business emails");
 }
 
+// this part was made by anders
 //checks if we pressed the 'b' key
 void keyCommands(char * key, uint8_t * bEnable) {
 
@@ -498,7 +504,7 @@ void keyCommands(char * key, uint8_t * bEnable) {
     }
 }
 
-
+// this part was made by anders and jakob
 //stores global information
 struct GlobalInfo {
     uint8_t isInBattle;
@@ -507,6 +513,7 @@ struct GlobalInfo {
 
 };
 
+// this part was made by anders and jakob
 //the struct for string an image (uses the charTransationTable variable for colors)
 struct Image {
 
@@ -516,9 +523,11 @@ struct Image {
 
 };
 
+// this part was made by anders and jakob
 //he we use a global variable, because it makes it easier to index, and we should not have a problem since it is static
 static char charTransationTable[][10] = {"\e[40m ", "\e[47m ", "\e[107m ", "\e[103m ", "\e[41m ", "\e[46m ", "\e[100m "}; //Black , white, bright white, bright yellow, red, cyan, bright black
 
+// this part was made by anders and jakob
 //prints a
 void printSubImage(struct Image* img,
                     uint8_t xStart, uint8_t yStart, uint8_t xEnd, uint8_t yEnd,
@@ -540,7 +549,7 @@ void printSubImage(struct Image* img,
 
 }
 
-
+//made by jakob
 //displays the options in battle on the LCD.
 void lcd_battle(uint8_t* buf, uint8_t* dir, uint8_t hoverPosition){
 
@@ -556,11 +565,13 @@ void lcd_battle(uint8_t* buf, uint8_t* dir, uint8_t hoverPosition){
 
 }
 
+//made by anders and jakob
 struct Fighter{
     uint8_t hp;
     char* name;
 };
 
+//made by anders
 //draws the health of lamppost or the van
 void drawHealth(struct Fighter* fighter, uint8_t x, uint8_t y) {
     uint8_t color;
@@ -589,6 +600,7 @@ void drawHealth(struct Fighter* fighter, uint8_t x, uint8_t y) {
 
 }
 
+//made by jakob
 //places the health packs on the map, but only if they have not been taken
 void placeHearts(struct Map * myMap) {
 
@@ -600,6 +612,7 @@ void placeHearts(struct Map * myMap) {
 
 }
 
+//made by jakob and anders
 //return 0 if do nothing, 1 to frontal attack, 2 to reverse attack, 3 to turn, 4 to horn, 5 to flee
 uint8_t updateHoverPosition(uint8_t* currentHover, uint8_t* dir) {
     uint8_t val = readJoystick();
@@ -663,6 +676,7 @@ uint8_t updateHoverPosition(uint8_t* currentHover, uint8_t* dir) {
     return ret;
 }
 
+//made by anders
 //cleas terminal and write game over
 void GameOver(uint16_t* score, struct GlobalInfo* info) {
     info->gameOver = 1;
@@ -673,6 +687,7 @@ void GameOver(uint16_t* score, struct GlobalInfo* info) {
 
 }
 
+//made by anders and jakob
 //waits delay * 10 milliseconds
 void wait(uint32_t delay){
     uint32_t cnt = 0;
@@ -682,7 +697,7 @@ void wait(uint32_t delay){
     }
 }
 
-
+//made by anders and jakob
 int main(void)
 {
     /////////////////////////initilazation of stuff START/////////////////////////
