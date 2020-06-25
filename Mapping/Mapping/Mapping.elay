@@ -1,34 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <EmBitz_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="..\..\Common\30010_io.c" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="-1" zoom_2="0">
+	<File name="..\..\Common\30010_io.c" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="7361" topLine="227" />
-		</Cursor>
-	</File>
-	<File name="..\..\Common\30010_io.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1066" topLine="0" />
+			<Cursor1 position="578" topLine="0" />
 		</Cursor>
 	</File>
 	<File name="..\..\Common\ansi.c" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1917" topLine="169" />
-		</Cursor>
-	</File>
-	<File name="..\..\Common\Utility.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2054" topLine="45" />
+			<Cursor1 position="1522" topLine="45" />
 		</Cursor>
 	</File>
 	<File name="inc\Radio.h" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="0" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="inc\stm32f30x.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="10741" topLine="159" />
+			<Cursor1 position="172" topLine="0" />
 		</Cursor>
 	</File>
 	<File name="SPL\src\stm32f30x_usart.c" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -36,31 +21,19 @@
 			<Cursor1 position="79363" topLine="1867" />
 		</Cursor>
 	</File>
-	<File name="src\main.c" open="1" top="1" tabpos="3" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
+	<File name="src\main.c" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="1" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="17913" topLine="170" />
-		</Cursor>
-		<Folding>
-			<Collapse line="29" />
-			<Collapse line="39" />
-			<Collapse line="127" />
-			<Collapse line="182" />
-			<Collapse line="251" />
-			<Collapse line="411" />
-			<Collapse line="446" />
-			<Collapse line="457" />
-			<Collapse line="531" />
-			<Collapse line="554" />
-		</Folding>
-	</File>
-	<File name="src\Radio.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="8337" topLine="184" />
+			<Cursor1 position="16003" topLine="467" />
 		</Cursor>
 	</File>
-	<File name="src\startup_stm32f30x.S" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src\Radio.c" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3768" topLine="92" />
+			<Cursor1 position="5624" topLine="74" />
+		</Cursor>
+	</File>
+	<File name="src\startup_stm32f30x.S" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3768" topLine="277" />
 		</Cursor>
 	</File>
 	<File name="stm32f302r8_sram.ld" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">

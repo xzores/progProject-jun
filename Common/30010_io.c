@@ -203,7 +203,7 @@ void setCharHelper(uint8_t* buf, uint8_t charIndex, uint16_t position, uint8_t i
     }
 }
 
-#define INTER_BUF_LENGTH 128*2
+#define INTER_BUF_LENGTH 128
 #define DISP_LENGTH 128
 
 void setChar(uint8_t* buf, char c, uint8_t x, uint8_t y, uint8_t inverse){

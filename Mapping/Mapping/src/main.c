@@ -701,8 +701,9 @@ int main(void)
 {
     struct GlobalInfo info = {0, 0, 0};
 
-    uart_init(515200);
+    uart_init(315200);
     homeCurser(); //Sæt curser til 0,0
+    showCursor(0);
     clearTermninal(); // Ryd terminal
     //struct Map myMap = {malloc(50 * 50 * sizeof(uint8_t)), 50, {{0xB0,0xB0,0xB0},  {0xDB,0xDB,0xDB}, {0xB3,0xDD,0xEF}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}};
     struct Map myMap = {malloc(8 * 33 * sizeof(uint8_t)), 32, {{' ',' ',' '},  {0xB2,0xB2,0xB2}, {',',' ','"'}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
@@ -845,7 +846,7 @@ int main(void)
             }
             else if (encounter == 2) {
                 //srand();
-                uint8_t foundWild = (rand() % 20 == 7); //10 % change to encounter wild pokemon
+                uint8_t foundWild = (rand() % 20 == 15); //10 % change to encounter wild pokemon
                 if(foundWild){
                     info.isInBattle = 1;
                     bgcolor(0);
