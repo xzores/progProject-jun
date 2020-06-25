@@ -1,0 +1,200 @@
+Journal Ex1:----------------------------------------------
+Vi har fundet os til rette med EmBitz, Putty og vores microcontroller. Der er etableret forbindelse imellem de forskellige enheder, og vi kan skrive til og aflæse outputtet fra microcontrolleren.
+Vi har brugt tid på at lære forskellige debugging metoder at kende. En del af exercise 1 har også været at arbejde med integer representations, Unsigned, Signed-magnitude, One's Compliment osv.
+
+Journal Ex2:----------------------------------------------
+Vi har brugt tid på at lære ANSI Escape-koder at kende. Disse er værktøjer til at modificere terminalens udseende, og vi regner med at det skal bruges til at lave grafik senere hen.
+Derudover har vi også kigget på, hvordan man udnytter CP850-typeset'et, til at printe figurer i terminalen. Følgende funktioner er blevet lavet:
+
+- clrscr(); Denne rydder skærmen for karakterer.
+  Vi har udnyttet Escape-koden [2J.
+
+- clreol(); Rydder resten af linjen, derfra hvor curseren er i terminalen.
+  Udføres med Escape-koden [K.
+
+- gotoxy(); Flytter curseren til en bestemt celle i terminalen. Funktionen tager to argumenter, ét koordinatsæt, som gives i ( x , -y ), dvs. oppefra og ned. Vi udnytter Escape-koden [x;y .
+
+- underline(); Skriver characters understreget.´Der er indsat et if-statement, som tager et argument, on, som hvis 0 slukker for underline, hvis 1 tænder for det. Gøres med Escape-koden [5m (on) eller [24m (off).
+
+- blink() og inverse(); På samme måde laves blink(), som får tekst og characters til at blinke, samt inverse(), som bytter om på farverne mellem tekst- og baggrundsfarve. Udføres som underline() med if statements og de rigtige ESC-kommando-cifre.
+
+-homeCurser(); Vi lavede en funktion som returnere curseren til den første, øverste celle.
+
+Window();-----------------------------------
+Window er en funktion, som printer et lukket, firkantet vindue i terminalen. Vinduet er tegnet af characters fra CP850. Vinduet tager to koordinatsæt, som er de hjørner hvor vinduet starter og slutter. Programmet tager derudover også en string som argument, som vises som titel øverst i vinduet.
+
+Der er lavet to styles af vinduer, som ændrer hvordan vinduet grafisk ser ud; et er enkelt-optrukket rundt om, et andet er dobbeltoptrukket. Dette klares med en struct, som indeholder integers, hvis værdier oversættes til en character. Alle disse characters er de, der er nødvendige for at tegne vores vindue. Alt efter hvilken style der givet som arguent til window(), vælges et sæt characters eller det andet.
+
+Vinduet bygges da op med en række for-loops, hvor der printes characters. Derudover tæller vi også hvor mange characters der er givet til titlen, og centerer derefter titlen, ved at sammenligne dens længde med vinduets totale længde, baseret på de givne koordinatsæt.
+Kode: ----------------------------------------------------
+#define ESC 0x1B
+#include "ansi.h"
+
+void fgcolor(uint8_t foreground) {
+/*  Value      foreground     Value     foreground
+    ------------------------------------------------
+      0        Black            8       Dark Gray
+      1        Red              9       Light Red
+      2        Green           10       Light Green
+      3        Brown           11       Yellow
+      4        Blue            12       Light Blue
+      5        Purple          13       Light Purple
+      6        Cyan            14       Light Cyan
+      7        Light Gray      15       White
+*/
+  uint8_t type = 22;             // normal text
+	if (foreground > 7) {
+	  type = 1;                // bold text
+		foreground -= 8;
+	}
+  printf("%c[%d;%dm", ESC, type, foreground+30);
+}
+
+void clearTermninal(){
+
+    printf("%c[2J", ESC);
+}
+
+void clreol(){
+
+    printf("%c[K", ESC);
+}
+
+void gotoxy(uint8_t x_1, uint8_t y_1) {
+    int x = y_1;
+    int y = x_1;
+
+    printf("%c[%d;%dH", ESC, x, y);
+}
+
+void homeCurser(){
+    printf("%c[H", ESC);
+}
+
+void underline (uint8_t on) {
+    if (on == 0) {
+        printf("%c[%dm", ESC, 24);
+    } else {
+        printf("%c[%dm", ESC, 4);
+    }
+}
+
+void blink(uint8_t on) {
+    if (on == 0) {
+        printf("%c[%dm", ESC, 25);
+    } else {
+        printf("%c[%dm", ESC, 5);
+    }
+}
+
+void inverse(uint8_t on) {
+     if (on == 0) {
+        printf("%c[%dm", ESC, 27);
+    } else {
+        printf("%c[%dm", ESC, 7);
+    }
+}
+
+
+void bgcolor(uint8_t background) {
+/* IMPORTANT:   When you first use this function you cannot get back to true white background in HyperTerminal.
+   Why is that? Because ANSI does not support true white background (ANSI white is gray to most human eyes).
+                The designers of HyperTerminal, however, preferred black text on white background, which is why
+                the colors are initially like that, but when the background color is first changed there is no
+ 	              way comming back.
+   Hint:        Use resetbgcolor(); clrscr(); to force HyperTerminal into gray text on black background.
+
+    Value      Color
+    ------------------
+      0        Black
+      1        Red
+      2        Green
+      3        Brown
+      4        Blue
+      5        Purple
+      6        Cyan
+      7        Gray
+*/
+  printf("%c[%dm", ESC, background+40);
+}
+
+void color(uint8_t foreground, uint8_t background) {
+// combination of fgcolor() and bgcolor() - uses less bandwidth
+  uint8_t type = 22;             // normal text
+	if (foreground > 7) {
+	  type = 1;                // bold text
+		foreground -= 8;
+	}
+  printf("%c[%d;%d;%dm", ESC, type, foreground+30, background+40);
+}
+
+void resetbgcolor() {
+// gray on black text, no underline, no blink, no reverse
+  printf("%c[m", ESC);
+}
+
+struct borderStyle{
+    uint16_t leftTopCorner, leftWall, rightWall,
+    rightTopcorner, vertical, leftBottomCorner,
+    horizontal, rigtBottomCorner;
+} default_borderStyle = {218,180,195,191,179,192,196,217};
+
+void window(uint8_t x_1, uint8_t y_1,uint8_t x_2, uint8_t y_2, char style, char title[]) {
+    int x1 = y_1;
+    int y1 = x_1;
+    int x2 = y_2;
+    int y2 = x_2;
+
+    struct borderStyle myStyle;
+
+
+    gotoxy(x1,y1);
+    //char a = 'A';
+    if (style == 'A') {
+        myStyle = default_borderStyle;
+    }
+    else if (style == 'B') {
+        myStyle.leftTopCorner = 201;
+        myStyle.leftWall = 185;
+        myStyle.rightWall = 204;
+        myStyle.rightTopcorner = 187;
+        myStyle.vertical = 186;
+        myStyle.leftBottomCorner = 200;
+        myStyle.horizontal = 205;
+        myStyle.rigtBottomCorner = 188;
+
+    }
+
+    printf("%c%c", myStyle.leftTopCorner, myStyle.leftWall);
+        inverse(1);
+        //charcount
+        int charCount = 0;
+        while (title[charCount] != '\0') {
+            charCount++;
+        }
+        int i;
+        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
+            printf(" ");
+        }
+        printf("%s", title);
+        for (i = 0; i < ((x2-x1)-charCount)/2-2; i++) {
+            printf(" ");
+        }
+        inverse(0);
+        printf("%c%c\n", myStyle.rightWall,myStyle.rightTopcorner);
+        //Lodrette linjer
+        for(i = 0; i < (y2-y1-2); i++){
+            printf("%c", myStyle.vertical);
+            int j;
+            for (j = 0; j < (x2-x1)-2; j++) {
+                printf(" ");
+            }
+            printf("%c\n", myStyle.vertical);
+        }
+        //Bundlinje
+        printf("%c",myStyle.leftBottomCorner);
+        for (i = 0; i < (x2-x1)-2; i++) {
+          printf("%c", myStyle.horizontal);
+        }
+        printf("%c\n",myStyle.rigtBottomCorner);
+}
