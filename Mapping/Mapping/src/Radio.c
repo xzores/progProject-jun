@@ -206,7 +206,7 @@ void sprintFixed(uint32_t i, char* str){
 }
 
 
-
+//setups the radio, to use with update radio function
 void setupRadio(char* toPrint){
     RCC->AHBENR |= RCC_AHBENR_GPIOBEN; // Enable clock line for GPIO bank B
     GPIOB->MODER &= ~(0x00000003 << (10 * 2)); // Clear mode register
@@ -241,39 +241,45 @@ void battleMusic() {
     station = 3;
 }
 
+//should be called every frame
 void updateRadio(char* toPrint, uint8_t* buf){
 
+    //remap adc (0-4096) to 87 Mhz til 108 Mhz
     uint32_t freq = remap(0, 256 << 16, 87 << 16, 108 << 16, convert(readAdc1())); // convert(readAdc1()); //remap(0, 256, 40, 2000, convert(readAdc1()));
+    //remap adc (0-4096) to 0 to 100
     uint32_t vol = remap(0, 256 << 16, 0, 100 << 16, convert(readAdc2())); //convert(readAdc2()); //remap(0, 256, 0, 100, convert(readAdc2()));
 
     sprintFixed(freq, freqstr);
 
+    //writes radio to LCD screen
     sprintf(toPrint,"FM: %s MHz", freqstr);
     lcd_write_string(buf, toPrint, 0,0, 0);
     sprintf(toPrint,"Vol: %d sound unit", (vol >> 16));
     lcd_write_string(buf, toPrint, 0,1, 0);
     lcd_push_buffer(buf);
 
+
+    //set station dependent on pot1 position
     if (90 << 16 > freq && freq > 88 << 16)
     {
-        configT15(240);
-        station = 0;
+        configT15(240); //set speed to 240 BPM
+        station = 0; //change to staion 0
     }
 
     else if(94 << 16 > freq && freq > 92 << 16)
     {
-        configT15(240);
-        station = 1;
+        configT15(240); //set speed to 240 BPM
+        station = 1; //change to station 1
     }
     else if(98 << 16 > freq && freq > 96 << 16)
     {
-        configT15(310);
-        station = 2;
+        configT15(310); //set speed to 340 BPM
+        station = 2; //change to station 2
     }
 
     else
     {
-        //configT15();
+        //if we are not on a channel simply create a high tone for noise
         setFreq(2000);
         station = 255;
     }
