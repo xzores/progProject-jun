@@ -485,15 +485,96 @@ void bossKey(char * key) {
     gotoxy(8,16);
     printf("business emails");
 }
+//Prints help-menu
+void helpKey(char * key) {
+    gotoxy(0,0);
+    bgcolor(0);
+    clearTermninal();
+    gotoxy(3,3);
+    window(3,3,26,26,'B',"Helpmenu "); //Window containing text
+
+    gotoxy(6,6);
+    printf("Move player with "); //Textstatements
+
+    gotoxy(6,7);
+    printf("W-A-S-D");
+
+    gotoxy(6,9);
+    printf("Score points by defea-");
+
+    gotoxy(6,10);
+    printf("ting wild lampposts!");
+
+    gotoxy(6,11);
+    printf("You'll find them in the");
+
+    gotoxy(6,12);
+    printf("grass! When in battle,");
+
+
+
+    gotoxy(6,13);
+    printf("use joystick to attack");
+
+    gotoxy(6,14);
+    printf("lamppost!");
+
+
+
+
+    gotoxy(6,16);
+    printf("The more lamppost you");
+
+    gotoxy(6,17);
+    printf("defeated, the more dam-");
+    gotoxy(6,18);
+    printf("age they'll do to");
+
+    gotoxy(6,19);
+    printf("your van!");
+
+    gotoxy(6,21);
+    printf("Make sure you get the ");
+
+    gotoxy(6,22);
+    printf("Powerups spread out in");
+
+    gotoxy(6,23);
+    printf("the map, to revitalise");
+
+    gotoxy(6,24);
+    printf("your HP!");
+
+    gotoxy(6,26);
+    printf("Remember to have some");
+
+    gotoxy(6,27);
+    printf("fun with the radio!");
+
+    gotoxy(6,29);
+    printf("Press 'h' to continue");
+
+
+
+
+}
 
 //checks if we pressed the 'b' key
-void keyCommands(char * key, uint8_t * bEnable) {
+void keyCommands(char * key, uint8_t * bEnable, uint8_t * hEnable) {
 
     if (*key == 'b') {
         if (*bEnable == 1) {
         bossKey(&key);
         }
         blink(0);
+        *key = '\0';
+    }
+
+    if (*key == 'h') {
+        if (*hEnable == 1) {
+        helpKey(&key);
+        }
+
         *key = '\0';
     }
 }
@@ -577,9 +658,9 @@ void drawHealth(struct Fighter* fighter, uint8_t x, uint8_t y) {
     printf("%c[%dm", 27, 40); //red
     window(y-2,x-2,2,17,'A',fighter->name);
     gotoxy(x,y);
-    uint8_t boxes = (fighter->hp >> 3) + 1; //divide by 16
+    uint8_t boxes = (fighter->hp >> 4) + 1; //divide by 16
     printf("%c[%dm", 27, color); //red
-    for (uint8_t i = 0; i < boxes; i++) {
+    for (uint8_t i = 0; i < boxes - 1; i++) {
         printf(" ");
     }
     printf("%c[%dm", 27, 40); //black
@@ -663,13 +744,16 @@ uint8_t updateHoverPosition(uint8_t* currentHover, uint8_t* dir) {
     return ret;
 }
 
-//cleas terminal and write game over
+//clears terminal and write game over
 void GameOver(uint16_t* score, struct GlobalInfo* info) {
     info->gameOver = 1;
     info->isInBattle = 0;
     clearTermninal();
     gotoxy(16,8);
     printf("GAME OVER\n               Your score was %d", *score);
+
+
+
 
 }
 
@@ -783,13 +867,16 @@ int main(void)
     van.imageData  = &vanarr;
 
     //player start position
-    myMap.posX = 16;
-    myMap.posY = 16;
+    myMap.posX = 110;
+    myMap.posY = 40;
 
     //temp storage for keycodes and what not
     char key;
     char nextKey;
     uint8_t bossEnable = 0;
+    uint8_t helpEnable = 0;
+    uint8_t startMenu = 1;
+    uint8_t startMenuPrinted = 0;
     char radioToPrint[256];
     uint8_t lastReadJoy = 0;
     uint8_t turn = 0;
@@ -825,213 +912,236 @@ int main(void)
         if (nextKey != '\0') {
             if (nextKey == 'b')
                 bossEnable = !bossEnable;
+            if (nextKey == 'h')
+                helpEnable = !helpEnable;
 
             key = nextKey;
         }
+        if (startMenu) { //startmenu
+            bgcolor(0);
+            gotoxy(10,16);
 
-        //this is the game loop when you are in the open wild (not in battle)
-        if(!info.isInBattle && !info.gameOver && !bossEnable){
-
-            //we reset the direction of the van when after a fight
-            dir = 0;
-
-            //this build all the buildings
-            builds(&myMap);
-            //this pleaces the health packs in the world
-            placeHearts(&myMap);
-
-            //needed to control the radio, see radio.c
-            updateRadio(radioToPrint, buf);
-
-            //prints the the view to the screen
-            printSubMap(&myMap, 0,0, 32,32);
-            //motion moves you if there is no wall and return the tile you are now standing on.
-            encounter = motion(&myMap, key, &(vanFighter.hp));
-
-            //we are standing on grass
-            if (encounter == 2) {
-
-                //if you are stading on grass there will be a chance to encounter a wild lamppost, this checks if you have encountered one.
-                uint8_t foundWild = (rand() % 20 == 15); //10 % change to encounter wild pokemon
-
-                //if we have encountered one enter battle
-                if(foundWild){
-                    info.isInBattle = 1; //we enter battle
-                    bgcolor(0);
-                    inverse(0);
-                    currentEnemy.hp = 255; //sets the enemy hp to full
-                    currentEnemy.name = "lamppost"; //sets the enemy to be a lamppost
-                    clearTermninal(); //clears the terminal
-                    lcd_graphics_buffer(buf, 512); //clears the LCD display
-
-                }
+            if (!startMenuPrinted){ //If startmenu hasn't been printed yet
+            startMenuPrinted = 1; //Will only be printet once
+            printf("Press 'p' to play.");
+            gotoxy(5,18);
+            printf("When in game, press 'h' for help.");
             }
-
-        }
-        else if(bossEnable){
-
-            //if the bosskey is enabled, we only show the "sending important emails stuff" and update the radio
-            updateRadio(radioToPrint, buf);
-            keyCommands(&key, &bossEnable);
-
-        }
-        else if (info.gameOver != 1) {
-
-            //play battle music when in battle
-            battleMusic();
+            char key = uart_get_char();
+            if (key == 'p') {
+                startMenu = 0;
+                clearTermninal();
+            }
+            uart_clear();
             gotoxy(0,0);
-            //print the image of the lamp
-            printSubImage(&lamp, 0, 0, lamp.width, lamp.heigth, 25, 3);
-            //print the image of the van
-            printSubImage(&van, 0, 0, van.width, van.heigth, 2, 30);
-            //draw health if van and lamp
-            drawHealth(&currentEnemy, 6, 10);
-            drawHealth(&vanFighter, 30, 35);
+        }
 
-            //the action that we have selected from the LCD display
-            uint8_t action = DO_NOTHING;
+        if (!startMenu) {
+        //this is the game loop when you are in the open wild (not in battle)
+            if(!info.isInBattle && !info.gameOver && !bossEnable && !helpEnable){
 
-            //push the battle options to the LCD display
-            lcd_battle(&buf, &dir, hoverPosition);
-            lcd_push_buffer(&buf);
+                //we reset the direction of the van when after a fight
+                dir = 0;
 
-            //if it your turn, 0 = your turn 1 = lamppost turn
-            if (turn == 0) {
+                //this build all the buildings
+                builds(&myMap);
+                //this pleaces the health packs in the world
+                placeHearts(&myMap);
 
-                gotoxy(15,28);
+                //needed to control the radio, see radio.c
+                updateRadio(radioToPrint, buf);
+
+                //prints the the view to the screen
+                printSubMap(&myMap, 0,0, 32,32);
+                //motion moves you if there is no wall and return the tile you are now standing on.
+                encounter = motion(&myMap, key, &(vanFighter.hp));
+
+                //we are standing on grass
+                if (encounter == 2) {
+
+                    //if you are stading on grass there will be a chance to encounter a wild lamppost, this checks if you have encountered one.
+                    uint8_t foundWild = (rand() % 20 == 15); //10 % change to encounter wild pokemon
+
+                    //if we have encountered one enter battle
+                    if(foundWild){
+                        info.isInBattle = 1; //we enter battle
+                        bgcolor(0);
+                        inverse(0);
+                        currentEnemy.hp = 255; //sets the enemy hp to full
+                        currentEnemy.name = "lamppost"; //sets the enemy to be a lamppost
+                        clearTermninal(); //clears the terminal
+                        lcd_graphics_buffer(buf, 512); //clears the LCD display
+
+                    }
+                }
+
+            }
+            else if(bossEnable || helpEnable){
+
+                //if the bosskey is enabled, we only show the "sending important emails stuff" and update the radio
+                updateRadio(radioToPrint, buf);
+                keyCommands(&key, &bossEnable, &helpEnable);
+
+            }
+            else if (info.gameOver != 1) {
+
+                //play battle music when in battle
+                battleMusic();
+                gotoxy(0,0);
+                //print the image of the lamp
+                printSubImage(&lamp, 0, 0, lamp.width, lamp.heigth, 25, 3);
+                //print the image of the van
+                printSubImage(&van, 0, 0, van.width, van.heigth, 2, 30);
+                //draw health if van and lamp
+                drawHealth(&currentEnemy, 6, 10);
+                drawHealth(&vanFighter, 30, 35);
+
+                //the action that we have selected from the LCD display
+                uint8_t action = DO_NOTHING;
+
+                //push the battle options to the LCD display
+                lcd_battle(&buf, &dir, hoverPosition);
+                lcd_push_buffer(&buf);
+
+                //if it your turn, 0 = your turn 1 = lamppost turn
+                if (turn == 0) {
+
+                    gotoxy(15,28);
+                    clreol();
+
+                    //edge detection
+                    if(readJoystick() != lastReadJoy){
+
+                        //find what action needs to be taken.
+                        action = updateHoverPosition(&hoverPosition, &dir);
+                        lastReadJoy = readJoystick();
+                    }
+                    //if the action in frontal attack then we dmg the lamppost
+                    if(action == FRONTAL_ATTACK){
+                        uint8_t dmg = 20 + rand() % 10;
+                        turn = !turn;// it will now be the lampposts turn
+
+                        gotoxy(10,28);
+                        printf("You crashed forwards into wild lamppost!");
+                        gotoxy(10,29);
+                        printf("Lamppost took %d damage!", dmg);
+                        wait(150);
+
+
+                        //if it is dies
+                        if(dmg > currentEnemy.hp){
+
+
+                            info.isInBattle = 0;
+                            clearTermninal();
+                            gotoxy(8,16);
+                            printf("Wild lamppost defeated!\n          You gained a point!");
+                            lcd_graphics_buffer(buf, 512);
+                            lcd_push_buffer(buf);
+                            score++;
+                            wait(150);
+                        }
+
+                        currentEnemy.hp -= dmg;
+
+                        wait(100); //waits 1 sec (10 * x ms)
+                    }
+                    else if(action == REVERSE_ATTACK){
+                        //if we reverse attack we do more dmg
+                        uint8_t dmg = 30 + rand() % 20;
+                        turn = !turn; // it will now be the lampposts turn
+                        ;
+                        gotoxy(10,28);
+                        printf("You reversed into wild lamppost!");
+                        gotoxy(10,29);
+                        printf("Lamppost took %d damage!", dmg);
+                        wait(150);
+
+                        //if we kill it
+                        if(dmg > currentEnemy.hp){
+
+
+                            info.isInBattle = 0;
+                            clearTermninal();
+                            gotoxy(8,16);
+                            printf("Wild lamppost defeated!\n          You gained a point!");
+                            lcd_graphics_buffer(buf, 512);
+                            lcd_push_buffer(buf);
+                            score++;
+                            wait(150);
+                        }
+
+                        currentEnemy.hp -= dmg;
+
+
+                        wait(200);//waits 2 sec (10 * x ms)
+                    }
+                    //horn does nothing
+                    else if (action == HORN) {
+                        turn = !turn;
+                        gotoxy(10,28);
+                        printf("You used your horn at wild lamppost!");
+                        gotoxy(10,29);
+                        printf("Attack was inefficient!");
+                         wait(150);
+
+                    }
+                    //turn turns the car around
+                    else if(action == TURN) {
+                        dir = !dir;
+                        turn = !turn;
+                        gotoxy(10,28);
+                        printf("You performed a three-point turn-around!");
+                        wait(150);
+                    }
+                    //flee makes you take dmg and exit combat
+                    else if(action == FLEE){
+
+                        info.isInBattle = 0;
+                        lcd_graphics_buffer(buf, 512);
+                        lcd_push_buffer(buf);
+                        clearTermninal();
+                        if (vanFighter.hp > 20) {
+                            vanFighter.hp -= 20;
+                            gotoxy(10,28);
+                            printf("You escaped!");
+                            gotoxy(10,29);
+                            printf("You took %d damage!", 20);
+                            wait(150);
+                        } else {
+                            GameOver(&score, &info);
+                        }
+                    }
+
+                gotoxy(10,28);
+                clreol();
+                gotoxy(10,29);
                 clreol();
 
-                //edge detection
-                if(readJoystick() != lastReadJoy){
 
-                    //find what action needs to be taken.
-                    action = updateHoverPosition(&hoverPosition, &dir);
-                    lastReadJoy = readJoystick();
                 }
-                //if the action in frontal attack then we dmg the lamppost
-                if(action == FRONTAL_ATTACK){
-                    uint8_t dmg = 20 + rand() % 10;
-                    turn = !turn;// it will now be the lampposts turn
-
-                    gotoxy(10,28);
-                    printf("You crashed forwards into wild lamppost!");
-                    gotoxy(10,29);
-                    printf("Lamppost took %d damage!", dmg);
-                    wait(150);
-
-
-                    //if it is dies
-                    if(dmg > currentEnemy.hp){
-
-
-                        info.isInBattle = 0;
-                        clearTermninal();
-                        gotoxy(8,16);
-                        printf("Wild lamppost defeated!\n          You gained a point!");
-                        lcd_graphics_buffer(buf, 512);
-                        lcd_push_buffer(buf);
-                        score++;
-                        wait(150);
-                    }
-
-                    currentEnemy.hp -= dmg;
-
-                    wait(100); //waits 1 sec (10 * x ms)
-                }
-                else if(action == REVERSE_ATTACK){
-                    //if we reverse attack we do more dmg
-                    uint8_t dmg = 30 + rand() % 20;
-                    turn = !turn; // it will now be the lampposts turn
-                    ;
-                    gotoxy(10,28);
-                    printf("You reversed into wild lamppost!");
-                    gotoxy(10,29);
-                    printf("Lamppost took %d damage!", dmg);
-                    wait(150);
-
-                    //if we kill it
-                    if(dmg > currentEnemy.hp){
-
-
-                        info.isInBattle = 0;
-                        clearTermninal();
-                        gotoxy(8,16);
-                        printf("Wild lamppost defeated!\n          You gained a point!");
-                        lcd_graphics_buffer(buf, 512);
-                        lcd_push_buffer(buf);
-                        score++;
-                        wait(150);
-                    }
-
-                    currentEnemy.hp -= dmg;
-
-
-                    wait(200);//waits 2 sec (10 * x ms)
-                }
-                //horn does nothing
-                else if (action == HORN) {
+                //this is the lamppost turn
+                if (turn == 1 && info.isInBattle) {
                     turn = !turn;
                     gotoxy(10,28);
-                    printf("You used your horn at wild lamppost!");
+                    printf("Wild lamppost used 'blind'!"); //it allways uses blind
+                    uint8_t dmg = rand() % 20 + score * 2;
                     gotoxy(10,29);
-                    printf("Attack was inefficient!");
-                     wait(150);
-
-                }
-                //turn turns the car around
-                else if(action == TURN) {
-                    dir = !dir;
-                    turn = !turn;
-                    gotoxy(10,28);
-                    printf("You performed a three-point turn-around!");
-                    wait(150);
-                }
-                //flee makes you take dmg and exit combat
-                else if(action == FLEE){
-
-                    info.isInBattle = 0;
-                    lcd_graphics_buffer(buf, 512);
-                    lcd_push_buffer(buf);
-                    clearTermninal();
-                    if (vanFighter.hp > 20) {
-                        vanFighter.hp -= 20;
+                    printf("You took %d damage!", dmg);
+                    if (vanFighter.hp > dmg) {
+                        vanFighter.hp -= dmg;
                     } else {
                         GameOver(&score, &info);
                     }
-                    gotoxy(10,28);
-                    printf("You escaped!");
-                    gotoxy(10,29);
-                    printf("You took %d damage!", 20);
                     wait(150);
                 }
 
-            gotoxy(10,28);
-            clreol();
-            gotoxy(10,29);
-            clreol();
-
-
-            }
-            //this is the lamppost turn
-            if (turn == 1 && info.isInBattle) {
-                turn = !turn;
                 gotoxy(10,28);
-                printf("Wild lamppost used 'blind'!"); //it allways uses blind
-                uint8_t dmg = rand() % 20 + score * 2;
+                clreol();
                 gotoxy(10,29);
-                printf("You took %d damage!", dmg);
-                if (vanFighter.hp > dmg) {
-                    vanFighter.hp -= dmg;
-                } else {
-                    GameOver(&score, &info);
-                }
-                wait(150);
+                clreol();
             }
 
-            gotoxy(10,28);
-            clreol();
-            gotoxy(10,29);
-            clreol();
         }
 
         key = '\0';
