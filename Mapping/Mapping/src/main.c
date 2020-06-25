@@ -26,13 +26,13 @@
 #define FLEE 5
 
 
-
+//used to store data about health packs
 uint8_t* posXHPBOOZT;
 uint8_t* posYHPBOOZT;
 uint8_t* bOOZTuSED;
 
 
-
+//map structure used for stong info about the player position and map tile data
 struct Map{
 
     uint8_t* buffer;
@@ -43,6 +43,7 @@ struct Map{
 
 };
 
+//helper function, used to check if what tiles should be printet to the tile buffer
 void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, int16_t* z, uint8_t* enableBuild){
 
     if ((pos - (b + bSize)) < (Size / 2) || (b - pos) < (Size / 2)) {//afstanden mellem player og blok er mindre end et halvt vindue
@@ -77,15 +78,7 @@ void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, i
     *z = MAX(0, MIN(Size, *z));
 }
 
-struct Player{
-
-    int16_t x;
-    int16_t y;
-    char look;
-    uint8_t viewSize;
-
-};
-
+//build the squre to the map
 void buildMap(struct Map* myMap, uint16_t bx, uint16_t by, uint16_t sizeX, uint16_t sizeY, char style) {
 
     uint16_t i, j;
@@ -126,11 +119,13 @@ void buildMap(struct Map* myMap, uint16_t bx, uint16_t by, uint16_t sizeX, uint1
 }
 
 
-
+//helper strcut used in tileScheme
 struct visual{
     uint8_t digit1, digit2, digit3, digit4, inv;
 } default_visual = {'3','7','4','0',0}; //ESC[37m ESC[40m, reset to white foreground, black background, inv off
 
+
+//helper function used to print the color of a tile
 uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
     struct visual myScheme;
     myScheme = default_visual;
@@ -185,7 +180,7 @@ uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
 }
 
 
-
+//prints a part of the map (aka the viewport) to the putty terminal
 void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t sizeY) {
 
     uint8_t i, j, t;
@@ -195,7 +190,6 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
 
     for (j = 0; j < myMap->mySize; j++) {
         t = 0;
-        uint8_t lastTile = 0;
 
         for (i = 0; i < myMap->mySize / 4; i++){
 
@@ -255,6 +249,7 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
     };
 }
 
+//this stores the campus map as a list of sqaures, these are build each frame.
 void builds(struct Map * myMap) {
     //Gr�s-l�rred
     buildMap(myMap, 0, 0, 255, 127, 'G');
@@ -400,23 +395,14 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 230, 112, 18, 5, 'W');
     buildMap(myMap, 225, 115, 6, 5, 'W');
 
-
-
-
-
-
-
-
-    /*buildMap(myMap, 0, 0, 5, 10, 'G');
-    buildMap(myMap, 5, 0, 4, 10, 'R');
-    buildMap(myMap, 9, 0, 10, 10, 'G');
-    buildMap(myMap, 10, 1, 8, 8, 'W'); */
 }
 
 void takeHeart(uint8_t* hp, uint8_t x, uint8_t y){
 
+    //heals the player
     *hp = 255;
 
+    //remove the health pack from the map (we need to check all the hp and then let the used bit high)
     for(int i = 0; i < 100; i++){
 
         if(x == posXHPBOOZT[i] && y == posYHPBOOZT[i]){
@@ -426,12 +412,14 @@ void takeHeart(uint8_t* hp, uint8_t x, uint8_t y){
 
 }
 
+
+//this function takes the map and the pressed key and the vans hp as a pointer
 uint8_t motion(struct Map* myMap, char key, uint8_t* hp) {
 
     uint8_t m = myMap->mySize / 2 - 1;
     uint8_t ret = -1;
 
-    //NÃ¦ste tile
+    //Next tile that we will land on is calculated
     uint8_t indexN = 127 - (myMap->mySize / 8) + 1;
     uint8_t indexS = 127 + (myMap->mySize / 8) + (myMap->mySize / 4) + 1;
     uint8_t indexE = 127 + (myMap->mySize / 8) + 1;
@@ -441,11 +429,9 @@ uint8_t motion(struct Map* myMap, char key, uint8_t* hp) {
     uint8_t nextE = (myMap->buffer[indexE] & (0x3 << 2)) >> 2; //next east
     uint8_t nextW = (myMap->buffer[indexW] & (0x3 << 6)) >> 6; //next West
 
-    //this tile
-
-
+    //check what key is pressed, if we land on a health pack heal the player, if we hit a wall dont move
     if (key == 'w') {
-        if(myMap->posY > m && nextN == 3){ //kÃ¸r nord
+        if(myMap->posY > m && nextN == 3){ //nord
             myMap->posY--;
             ret = nextN;
             takeHeart(hp, myMap->posX, myMap->posY);
@@ -456,7 +442,7 @@ uint8_t motion(struct Map* myMap, char key, uint8_t* hp) {
         }
     } else if (key == 's') {
 
-        if (myMap->posY < 127 - m && nextS == 3) { //kÃ¸r syd
+        if (myMap->posY < 127 - m && nextS == 3) { //syd
             myMap->posY++;
             ret = nextS;
             takeHeart(hp, myMap->posX, myMap->posY);
@@ -466,7 +452,7 @@ uint8_t motion(struct Map* myMap, char key, uint8_t* hp) {
         }
     }
     else if (key == 'a') {
-        if (myMap->posX > m && nextW == 3) { // kÃ¸r vest
+        if (myMap->posX > m && nextW == 3) { //vest
             myMap->posX--;
             ret = nextE;
             takeHeart(hp, myMap->posX, myMap->posY);
@@ -475,7 +461,7 @@ uint8_t motion(struct Map* myMap, char key, uint8_t* hp) {
             ret = nextE;
         }
     } else if (key == 'd') {
-        if(myMap->posX < 255 - m && nextE == 3) { // kÃ¸r Ã¸st
+        if(myMap->posX < 255 - m && nextE == 3) { //east
             myMap->posX++;
             ret = nextW;
             takeHeart(hp, myMap->posX, myMap->posY);
@@ -488,17 +474,7 @@ uint8_t motion(struct Map* myMap, char key, uint8_t* hp) {
     return ret;
 }
 
-void keyCommands(char * key, uint8_t * bEnable) {
-
-    if (*key == 'b') {
-        if (*bEnable == 1) {
-        bossKey(&key);
-        }
-        blink(0);
-        *key = '\0';
-    }
-}
-
+//blinks "sending important emils" on the screen
 void bossKey(char * key) {
     gotoxy(0,0);
     bgcolor(0);
@@ -511,6 +487,20 @@ void bossKey(char * key) {
     printf("Sending important");
 }
 
+//checks if we pressed the 'b' key
+void keyCommands(char * key, uint8_t * bEnable) {
+
+    if (*key == 'b') {
+        if (*bEnable == 1) {
+        bossKey(&key);
+        }
+        blink(0);
+        *key = '\0';
+    }
+}
+
+
+//stores global information
 struct GlobalInfo {
     uint8_t isInBattle;
     uint8_t battingType;//0 = nobattle, 1 = standart lygtepel, 2 = wild, 3 = super....
@@ -518,6 +508,7 @@ struct GlobalInfo {
 
 };
 
+//the struct for string an image (uses the charTransationTable variable for colors)
 struct Image {
 
     uint8_t* imageData;
@@ -526,9 +517,10 @@ struct Image {
 
 };
 
-//{"\e[40m1", "\e[40m2", "\e[40m3", "\e[40m4", "\e[40m5"}
+//he we use a global variable, because it makes it easier to index, and we should not have a problem since it is static
 static char charTransationTable[][10] = {"\e[40m ", "\e[47m ", "\e[107m ", "\e[103m ", "\e[41m ", "\e[46m ", "\e[100m "}; //Black , white, bright white, bright yellow, red, cyan, bright black
 
+//prints a
 void printSubImage(struct Image* img,
                     uint8_t xStart, uint8_t yStart, uint8_t xEnd, uint8_t yEnd,
                     uint8_t xScreen, uint8_t yScreen){
@@ -550,16 +542,7 @@ void printSubImage(struct Image* img,
 }
 
 
-void fadeInEnemy(struct Image* img){
-
-    for(uint8_t i = 0; i < img->heigth; i++){
-
-       // printSubImage(img, 0, 0, img->width, i, 3, 3);
-    }
-
-}
-
-
+//displays the options in battle on the LCD.
 void lcd_battle(uint8_t* buf, uint8_t* dir, uint8_t hoverPosition){
 
 
@@ -579,6 +562,7 @@ struct Fighter{
     char* name;
 };
 
+//draws the health of lamppost or the van
 void drawHealth(struct Fighter* fighter, uint8_t x, uint8_t y) {
     uint8_t color;
     if (fighter->hp > 170) {
@@ -594,7 +578,7 @@ void drawHealth(struct Fighter* fighter, uint8_t x, uint8_t y) {
     printf("%c[%dm", 27, 40); //red
     window(y-2,x-2,2,17,'A',fighter->name);
     gotoxy(x,y);
-    uint8_t boxes = fighter->hp >> 3 + 1; //divide by 16
+    uint8_t boxes = (fighter->hp >> 3) + 1; //divide by 16
     printf("%c[%dm", 27, color); //red
     for (uint8_t i = 0; i < boxes; i++) {
         printf(" ");
@@ -606,7 +590,7 @@ void drawHealth(struct Fighter* fighter, uint8_t x, uint8_t y) {
 
 }
 
-
+//places the health packs on the map, but only if they have not been taken
 void placeHearts(struct Map * myMap) {
 
     for (uint8_t i = 0; i < 100; i++) {
@@ -680,7 +664,8 @@ uint8_t updateHoverPosition(uint8_t* currentHover, uint8_t* dir) {
     return ret;
 }
 
-void GameOver(uint8_t* score, struct GlobalInfo* info) {
+//cleas terminal and write game over
+void GameOver(uint16_t* score, struct GlobalInfo* info) {
     info->gameOver = 1;
     info->isInBattle = 0;
     clearTermninal();
@@ -689,6 +674,7 @@ void GameOver(uint8_t* score, struct GlobalInfo* info) {
 
 }
 
+//waits delay * 10 milliseconds
 void wait(uint32_t delay){
     uint32_t cnt = 0;
     uint32_t start = getTimer15Cnt();
@@ -697,17 +683,20 @@ void wait(uint32_t delay){
     }
 }
 
+
 int main(void)
 {
+    /////////////////////////initilazation of stuff START/////////////////////////
     struct GlobalInfo info = {0, 0, 0};
 
     uart_init(315200);
-    homeCurser(); //Sæt curser til 0,0
-    showCursor(0);
+    homeCurser(); //Set curser til 0,0
+    showCursor(0); //hide curser
     clearTermninal(); // Ryd terminal
-    //struct Map myMap = {malloc(50 * 50 * sizeof(uint8_t)), 50, {{0xB0,0xB0,0xB0},  {0xDB,0xDB,0xDB}, {0xB3,0xDD,0xEF}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}};
+    //look at map structure
     struct Map myMap = {malloc(8 * 33 * sizeof(uint8_t)), 32, {{' ',' ',' '},  {0xB2,0xB2,0xB2}, {',',' ','"'}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
 
+    //random spawning health packs
     posXHPBOOZT = calloc(100, sizeof(uint8_t));
     posYHPBOOZT = calloc(100, sizeof(uint8_t));
     bOOZTuSED = calloc(100, sizeof(uint8_t));
@@ -717,12 +706,15 @@ int main(void)
         posYHPBOOZT[i] = rand() % 127;
     }
 
-    //memset(myMap.buffer, 0x00, 128 * 256);
-
+    //direction of van
     uint8_t dir = 0; //0 = front, 1 = back
+    //lamp image for when in battle (data set later)
     struct Image lamp ={0, 8, 24};
+    //van image for when in battle (data set later)
     struct Image van = {0,24,10};
-    uint16_t score = 0;
+    //the image data is using a lookup table to store color at what not
+
+    uint16_t score = 0; //score of player added 1 for each lamppost
 
     //setup joystick
     {
@@ -747,8 +739,7 @@ int main(void)
     setPortPuPd(DOWN_JOY_STICK, NO_PULL);
     }
 
-
-
+    //the image for the lamp
     uint8_t lamparr[] = {
                         0,0,1,1,1,1,0,0,
                         1,1,1,1,1,1,1,1,
@@ -775,7 +766,7 @@ int main(void)
                         0,1,1,1,1,1,1,0,
                         0,1,1,1,1,1,1,0
                     };
-
+    //the image data for the van
     uint8_t vanarr[] = {
                         0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,
                         0,2,2,4,4,4,2,4,4,4,2,4,2,4,2,2,2,5,5,5,0,0,0,0,
@@ -789,38 +780,48 @@ int main(void)
                         0,0,0,0,6,6,6,6,0,0,0,0,0,0,0,0,6,6,6,6,0,0,0,0
                         };
 
+    //sets the image data
     lamp.imageData  = &lamparr;
     van.imageData  = &vanarr;
+
+    //player start position
     myMap.posX = 16;
     myMap.posY = 16;
+
+    //temp storage for keycodes and what not
     char key;
     char nextKey;
     uint8_t bossEnable = 0;
     char radioToPrint[256];
-    uint8_t buf[512];
-    lcd_graphics_buffer(buf, 512);
-    uint8_t hoverPosition = 0;
     uint8_t lastReadJoy = 0;
     uint8_t turn = 0;
-    setupRadio(radioToPrint);
 
+    //the LCD buffer
+    uint8_t buf[512];
+    lcd_graphics_buffer(buf, 512);
+
+    //LCD Hover position
+    uint8_t hoverPosition = 0;
+
+    //struct to draw health in putty
     struct Fighter vanFighter = {150, "Van "};
     struct Fighter currentEnemy = {0, ""};
 
+    //we setup PWM and timers
+    setupRadio(radioToPrint);
 
-    // TImer ---------------------------------
-   // initTimer3();
+    /////////////////////////initilazation of stuff END /////////////////////////
 
-
-    //-----------------------------------------
-
-
-    //builds(&myMap, posX, posY,);
-
+    //game logic loop
     while(1)
     {
+        //dont inverse putty (was a problem at some point)
         inverse(0);
+
+        //this stores what the next tile you land on will be
         uint8_t encounter = 0;
+
+        //read keycodes
         nextKey = uart_get_char();
         uart_clear();
         if (nextKey != '\0') {
@@ -830,69 +831,91 @@ int main(void)
             key = nextKey;
         }
 
+        //this is the game loop when you are in the open wild (not in battle)
         if(!info.isInBattle && !info.gameOver && !bossEnable){
+
+            //we reset the direction of the van when after a fight
             dir = 0;
+
+            //this build all the buildings
             builds(&myMap);
+            //this pleaces the health packs in the world
             placeHearts(&myMap);
 
+            //needed to control the radio, see radio.c
             updateRadio(radioToPrint, buf);
 
-
+            //prints the the view to the screen
             printSubMap(&myMap, 0,0, 32,32);
+            //motion moves you if there is no wall and return the tile you are now standing on.
             encounter = motion(&myMap, key, &(vanFighter.hp));
 
-            if(encounter == 3){
-                //enter battle
-            }
-            else if (encounter == 2) {
-                //srand();
+            //we are standing on grass
+            if (encounter == 2) {
+
+                //if you are stading on grass there will be a chance to encounter a wild lamppost, this checks if you have encountered one.
                 uint8_t foundWild = (rand() % 20 == 15); //10 % change to encounter wild pokemon
+
+                //if we have encountered one enter battle
                 if(foundWild){
-                    info.isInBattle = 1;
+                    info.isInBattle = 1; //we enter battle
                     bgcolor(0);
                     inverse(0);
-                    currentEnemy.hp = 255;
-                    currentEnemy.name = "lamppost";
-                    clearTermninal();
-                    lcd_graphics_buffer(buf, 512);
-                    //fadeInEnemy(&lamparr);
+                    currentEnemy.hp = 255; //sets the enemy hp to full
+                    currentEnemy.name = "lamppost"; //sets the enemy to be a lamppost
+                    clearTermninal(); //clears the terminal
+                    lcd_graphics_buffer(buf, 512); //clears the LCD display
+
                 }
             }
 
         }
         else if(bossEnable){
 
+            //if the bosskey is enabled, we only show the "sending important emails stuff" and update the radio
             updateRadio(radioToPrint, buf);
             keyCommands(&key, &bossEnable);
 
         }
         else if (info.gameOver != 1) {
+
+            //play battle music when in battle
             battleMusic();
             gotoxy(0,0);
+            //print the image of the lamp
             printSubImage(&lamp, 0, 0, lamp.width, lamp.heigth, 25, 3);
+            //print the image of the van
             printSubImage(&van, 0, 0, van.width, van.heigth, 2, 30);
+            //draw health if van and lamp
             drawHealth(&currentEnemy, 6, 10);
             drawHealth(&vanFighter, 30, 35);
+
+            //the action that we have selected from the LCD display
             uint8_t action = DO_NOTHING;
 
+            //push the battle options to the LCD display
             lcd_battle(&buf, &dir, hoverPosition);
             lcd_push_buffer(&buf);
 
-      /*----*/  if (turn == 0) {
+            //if it your turn, 0 = your turn 1 = lamppost turn
+            if (turn == 0) {
 
                 gotoxy(15,28);
                 clreol();
 
-
+                //edge detection
                 if(readJoystick() != lastReadJoy){
+
+                    //find what action needs to be taken.
                     action = updateHoverPosition(&hoverPosition, &dir);
                     lastReadJoy = readJoystick();
                 }
-
+                //if the action in frontal attack then we dmg the lamppost
                 if(action == FRONTAL_ATTACK){
                     uint8_t dmg = 20 + rand() % 10;
-                    turn = !turn;
+                    turn = !turn;// it will now be the lampposts turn
 
+                    //if it is dies
                     if(dmg > currentEnemy.hp){
                         info.isInBattle = 0;
                         clearTermninal();
@@ -902,12 +925,14 @@ int main(void)
                     }
 
                     currentEnemy.hp -= dmg;
-                    wait(100);
+                    wait(100); //waits 1 sec (10 * x ms)
                 }
                 else if(action == REVERSE_ATTACK){
+                    //if we reverse attack we do more dmg
                     uint8_t dmg = 30 + rand() % 20;
-                    turn = !turn;
+                    turn = !turn; // it will now be the lampposts turn
 
+                    //if we kill it
                     if(dmg > currentEnemy.hp){
                         gotoxy(8,16);
 
@@ -920,19 +945,21 @@ int main(void)
                     }
 
                     currentEnemy.hp -= dmg;
-                    wait(200);
+                    wait(200);//waits 2 sec (10 * x ms)
                 }
-
+                //horn does nothing
                 else if (action == HORN) {
                     turn = !turn;
                     wait(100);
 
                 }
+                //turn turns the car around
                 else if(action == TURN) {
                     dir = !dir;
                     turn = !turn;
                     wait(100);
                 }
+                //flee makes you take dmg and exit combat
                 else if(action == FLEE){
 
                     info.isInBattle = 0;
@@ -947,12 +974,12 @@ int main(void)
                     wait(100);
                 }
 
-
             }
+            //this is the lamppost turn
             if (turn == 1 && info.isInBattle) {
                 turn = !turn;
                 gotoxy(15,28);
-                printf("Wild lamppost used 'blind'!");
+                printf("Wild lamppost used 'blind'!"); //it allways uses blind
                 uint8_t dmg = rand() % 20 + score * 2;
 
                 if (vanFighter.hp > dmg) {
