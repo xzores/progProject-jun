@@ -47,29 +47,30 @@ struct Map{
 //helper function, used to check if what tiles should be printet to the tile buffer
 void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, int16_t* z, uint8_t* enableBuild){
 
-    if ((pos - (b + bSize)) < (Size / 2) || (b - pos) < (Size / 2)) {//afstanden mellem player og blok er mindre end et halvt vindue
+    if ((pos - (b + bSize)) < (Size / 2) || (b - pos) < (Size / 2)) //distance from player to block is less than half a window
 
-        *enableBuild = 1; //Der skrives til array hvis et if-statement aktiveres
 
-        if ((pos - b) <= (Size / 2) && (pos - b) > 0) { //Boks starter i 2. eller 3. kvadrant
+        *enableBuild = 1; //Must be one for block to be initialized in window
+
+        if ((pos - b) <= (Size / 2) && (pos - b) > 0) { //Block is in 2nd or 3rd quadrant of window
             *s = (Size / 2) - (pos - b);
-                if ((pos + (Size / 2) - b) >= bSize) { //Hvis resten af vinduet er l�ngere end boksen
+                if ((pos + (Size / 2) - b) >= bSize) { //remaining window is longer than the block
                     *z = bSize;
                     } else {
-                    *z = pos + (Size / 2) - b; //Hvis boksen g�r ud over vinduet
+                    *z = pos + (Size / 2) - b; //Block is longer than remaining window
                     }
         }
 
-        if (b >= pos) { // Boksen starter i 1. eller 4. kvadrant
+        if (b >= pos) { //Block is in 1st or 4th quadrant of window
 
             *s = (Size / 2) + b - pos;
-                if ((Size / 2) - (b - pos) >= bSize) {//Hvis resten af vinduet er l�ngere end boksen
+                if ((Size / 2) - (b - pos) >= bSize) {//remaining window is longer than the block
                     *z = bSize;
                 } else {
-                    *z = (Size / 2) - (b - pos); //Hvis boksen g�r ud over vinduet
+                    *z = (Size / 2) - (b - pos); //Block is longer than remaining window
                 }
 
-        } else if (b < (pos - (Size / 2))) { //Boksen starter udenfor vinduet
+        } else if (b < (pos - (Size / 2))) { //Block startpoint is outside of the window
             *s = 0;
             *z = bSize - (pos - (Size / 2) - b);
         }
@@ -103,7 +104,8 @@ void buildMap(struct Map* myMap, uint16_t bx, uint16_t by, uint16_t sizeX, uint1
 
     calcAkse(myMap->posY, myMap->mySize, sizeY, by, &ys, &yz, &enableBuildY);
 
-    if (enableBuildX && enableBuildY) { //Der skrives til buffer, hvis figuren på begge akser ligger inden for radius
+    if (enableBuildX && enableBuildY) { //Buffer gets data, if block on both axis is inside of radius to player
+
         for (i = xs; i < xs + xz; i++) {
             for (j = ys; j < ys + yz; j++) {
                 uint8_t shiftIndex = (i % 4) * 2;
@@ -112,8 +114,8 @@ void buildMap(struct Map* myMap, uint16_t bx, uint16_t by, uint16_t sizeX, uint1
                 if(j > myMap->mySize || i > myMap->mySize)
                     continue;
 
-                myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize / 4 ] &= ~(0x3 << shiftIndex); //tile resettes //index % myMap->mySize er altid lig index ??
-                myMap->buffer[index /*% myMap->mySize*/ + j * myMap->mySize / 4 ] |= (type << shiftIndex);
+                myMap->buffer[index + j * myMap->mySize / 4 ] &= ~(0x3 << shiftIndex); //tile resettes
+                myMap->buffer[index + j * myMap->mySize / 4 ] |= (type << shiftIndex);
             }
         }
     }
@@ -150,23 +152,23 @@ uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
         myScheme.digit2 = '2';
         myScheme.digit3 = '4';
         myScheme.digit4 = '2';
-     } else if (style == 3) { //Lygtep�l, FG 93, BG 43, INv 0ff
+     } else if (style == 3) { //HP, FG 93, BG 43, INv 0ff
         myScheme.digit1 = '3';
         myScheme.digit2 = '7';
         myScheme.digit3 = '4';
         myScheme.digit4 = '1';
      }
 
-     //Invers printet to array
+     //Invers printed to array
      toPrint[t++] = 0x1B; // ESC
      toPrint[t++] = 0x5B; // [
      if (myScheme.inv == 0) {
-         toPrint[t++] = '2'; } //7 eller 27, on eller off
+         toPrint[t++] = '2'; } //7 or 27, on eller off
      toPrint[t++] = '7'; //7 for inverse, 27 for not-inverse
      toPrint[t++] = 'm';
 
 
-    //Foreground og Background
+    //Foreground and Background
     toPrint[t++] = 0x1B; // ESC
     toPrint[t++] = 0x5B; // [
     toPrint[t++] = myScheme.digit1;
@@ -188,7 +190,7 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
     uint8_t i, j, t;
 
 
-    char toPrint[sizeX * sizeY * 10 + 2]; // *10 ??
+    char toPrint[sizeX * sizeY * 10 + 2]; //Array to be filled with data, then printet to Putty
 
     for (j = 0; j < myMap->mySize; j++) {
         t = 0;
@@ -209,7 +211,7 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
             srand(b);
             uint16_t r = rand() % 3;
 
-            t = tileScheme(&toPrint, t, d1); //ESC-codes tilføjes til toPrint, t opdateres
+            t = tileScheme(&toPrint, t, d1); //ESC-codes added to toPrint, t is updated
             if(i == 4 && j == 16)
                 toPrint[t++] = 0xb8;
             else{
@@ -219,9 +221,9 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
             posX++;
             b = (posX * 5) % 231 + posY % 51;
             srand(b);
-            r = rand() % 3;
+            r = rand() % 3; //random printing one of three characters, to make variations in Grass-structure
 
-            if (d2 != d1)
+            if (d2 != d1) //if previous tile is the same as this, for example Wall and Wall
             t = tileScheme(&toPrint, t, d2);
             toPrint[t++] = myMap->style[d2][r];
 
@@ -254,7 +256,7 @@ void printSubMap(struct Map* myMap, uint8_t x, uint8_t y, uint8_t sizeX, uint8_t
 //this part was made by anders
 //this stores the campus map as a list of sqaures, these are build each frame.
 void builds(struct Map * myMap) {
-    //Gr�s-l�rred
+    //Grass-canvas
     buildMap(myMap, 0, 0, 255, 127, 'G');
 
     //Major Roads
@@ -294,7 +296,7 @@ void builds(struct Map * myMap) {
 
 
 
-    // Torve og parkeringspladser
+    // Squares and parking-lots
     buildMap(myMap, 43, 89, 18, 33, 'R'); // �rsted plads
     buildMap(myMap, 95, 29, 30, 22, 'R'); // Matematiktorvet
     buildMap(myMap, 125, 29, 7, 1, 'R'); // Mtorv2
@@ -304,7 +306,7 @@ void builds(struct Map * myMap) {
 
 
 
-    //Stier
+    //small roads
     buildMap(myMap, 95, 51, 2, 13, 'R'); // sti 1
     buildMap(myMap, 47, 66, 1, 13, 'R'); // sti 5
     buildMap(myMap, 106, 81, 44, 1, 'R'); // Sti 6
@@ -312,9 +314,9 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 154,98, 11, 2, 'R'); // Sti 3
     buildMap(myMap, 169,27, 50, 1, 'R'); // Sti 4
 
-    //Bygninger/Walls Sektor 1m->
+    //Buildings/Walls Sector 1
 
-   buildMap(myMap, 29, 12, 41, 6, 'W'); // B309
+    buildMap(myMap, 29, 12, 41, 6, 'W'); // B309
     buildMap(myMap, 78, 9, 68, 14, 'W'); //B303
     buildMap(myMap, 78, 22, 11, 11, 'W'); //B306
     buildMap(myMap, 126, 31, 22, 6, 'W'); //B304
@@ -328,7 +330,7 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 59, 62, 2, 5, 'W'); // SPace 2
     buildMap(myMap, 49, 67, 19, 6, 'W'); // DTU Space
 
-    //Sektor 2
+    //Sector 2
     buildMap(myMap, 8, 83, 20, 3, 'W'); // Science Park
     buildMap(myMap, 8, 88, 8, 2, 'W'); // SP2
     buildMap(myMap, 8, 91, 8, 4, 'W'); // SP3
@@ -352,7 +354,7 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 116, 102, 32, 8, 'W'); // F3
     buildMap(myMap, 116, 111, 32, 10, 'W'); //
 
-    //sektor 3
+    //sector 3
     buildMap(myMap, 177, 7, 37, 5, 'W'); // Kraftvarmeværk
     buildMap(myMap, 211, 12, 4, 6, 'W'); // KV2
     buildMap(myMap, 177, 12, 9, 6, 'W'); // KV3
@@ -364,7 +366,7 @@ void builds(struct Map * myMap) {
     buildMap(myMap, 172, 86, 11, 33, 'W'); // B423
     buildMap(myMap, 205, 85, 11, 31, 'W'); // B427
 
-    //Sektor 4
+    //Sector 4
     buildMap(myMap, 225, 7, 5, 5, 'W'); //VKR1
     buildMap(myMap, 230, 7, 16, 3, 'W'); // VKR2
     buildMap(myMap, 242, 3, 4, 7, 'W'); // VKR3
@@ -417,7 +419,7 @@ void takeHeart(uint8_t* hp, uint8_t x, uint8_t y){
 }
 
 //this part was made by anders
-//this function takes the map and the pressed key and the vans hp as a pointer
+//this function takes the map and the pressed key and the vans(player) hp as a pointer
 uint8_t motion(struct Map* myMap, char key, uint8_t* hp) {
 
     uint8_t m = myMap->mySize / 2 - 1;
@@ -516,16 +518,11 @@ void helpKey(char * key) {
     gotoxy(6,12);
     printf("grass! When in battle,");
 
-
-
     gotoxy(6,13);
     printf("use joystick to attack");
 
     gotoxy(6,14);
     printf("lamppost!");
-
-
-
 
     gotoxy(6,16);
     printf("The more lamppost you");
@@ -558,10 +555,6 @@ void helpKey(char * key) {
 
     gotoxy(6,29);
     printf("Press 'h' to continue");
-
-
-
-
 }
 
 // this part was made by anders
@@ -572,7 +565,7 @@ void keyCommands(char * key, uint8_t * bEnable, uint8_t * hEnable) {
         if (*bEnable == 1) {
         bossKey(&key);
         }
-        blink(0);
+        blink(0); //disable blink when done with Bosskey
         *key = '\0';
     }
 
@@ -652,7 +645,7 @@ struct Fighter{
     char* name;
 };
 
-//made by anders
+//made by anders and Jakob
 //draws the health of lamppost or the van
 void drawHealth(struct Fighter* fighter, uint8_t x, uint8_t y) {
     uint8_t color;
