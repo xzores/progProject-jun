@@ -149,10 +149,10 @@ uint8_t tileScheme(char* toPrint, uint8_t t, uint8_t style) {
         myScheme.digit3 = '4';
         myScheme.digit4 = '2';
      } else if (style == 3) { //Lygtep�l, FG 93, BG 43, INv 0ff
-        myScheme.digit1 = '9';
-        myScheme.digit2 = '3';
+        myScheme.digit1 = '3';
+        myScheme.digit2 = '7';
         myScheme.digit3 = '4';
-        myScheme.digit4 = '3';
+        myScheme.digit4 = '1';
      }
 
      //Invers printet to array
@@ -478,13 +478,12 @@ uint8_t motion(struct Map* myMap, char key, uint8_t* hp) {
 void bossKey(char * key) {
     gotoxy(0,0);
     bgcolor(0);
-    gotoxy(8,16);
-    printf("business emails");
-
     clearTermninal();
     blink(1);
     gotoxy(8,15);
     printf("Sending important");
+    gotoxy(8,16);
+    printf("business emails");
 }
 
 //checks if we pressed the 'b' key
@@ -693,8 +692,7 @@ int main(void)
     homeCurser(); //Set curser til 0,0
     showCursor(0); //hide curser
     clearTermninal(); // Ryd terminal
-    //look at map structure
-    struct Map myMap = {malloc(8 * 33 * sizeof(uint8_t)), 32, {{' ',' ',' '},  {0xB2,0xB2,0xB2}, {',',' ','"'}, {0xF4, 0xF4, 0xF4}}, {1,2,3,4}}; //R, W, G, L
+    struct Map myMap = {malloc(8 * 33 * sizeof(uint8_t)), 32, {{' ',' ',' '},  {0xB2,0xB2,0xB2}, {',',' ','"'}, {'+', '+', '+'}}, {1,2,3,4}}; //R, W, G, L
 
     //random spawning health packs
     posXHPBOOZT = calloc(100, sizeof(uint8_t));
@@ -804,7 +802,7 @@ int main(void)
     uint8_t hoverPosition = 0;
 
     //struct to draw health in putty
-    struct Fighter vanFighter = {150, "Van "};
+    struct Fighter vanFighter = {255, "Van "};
     struct Fighter currentEnemy = {0, ""};
 
     //we setup PWM and timers
@@ -915,49 +913,78 @@ int main(void)
                     uint8_t dmg = 20 + rand() % 10;
                     turn = !turn;// it will now be the lampposts turn
 
+                    gotoxy(10,28);
+                    printf("You crashed forwards into wild lamppost!");
+                    gotoxy(10,29);
+                    printf("Lamppost took %d damage!", dmg);
+                    wait(150);
+
+
                     //if it is dies
                     if(dmg > currentEnemy.hp){
+
+
                         info.isInBattle = 0;
                         clearTermninal();
+                        gotoxy(8,16);
+                        printf("Wild lamppost defeated!\n          You gained a point!");
                         lcd_graphics_buffer(buf, 512);
                         lcd_push_buffer(buf);
                         score++;
+                        wait(150);
                     }
 
                     currentEnemy.hp -= dmg;
+
                     wait(100); //waits 1 sec (10 * x ms)
                 }
                 else if(action == REVERSE_ATTACK){
                     //if we reverse attack we do more dmg
                     uint8_t dmg = 30 + rand() % 20;
                     turn = !turn; // it will now be the lampposts turn
+                    ;
+                    gotoxy(10,28);
+                    printf("You reversed into wild lamppost!");
+                    gotoxy(10,29);
+                    printf("Lamppost took %d damage!", dmg);
+                    wait(150);
 
                     //if we kill it
                     if(dmg > currentEnemy.hp){
-                        gotoxy(8,16);
+
 
                         info.isInBattle = 0;
                         clearTermninal();
+                        gotoxy(8,16);
                         printf("Wild lamppost defeated!\n          You gained a point!");
                         lcd_graphics_buffer(buf, 512);
                         lcd_push_buffer(buf);
                         score++;
+                        wait(150);
                     }
 
                     currentEnemy.hp -= dmg;
+
+
                     wait(200);//waits 2 sec (10 * x ms)
                 }
                 //horn does nothing
                 else if (action == HORN) {
                     turn = !turn;
-                    wait(100);
+                    gotoxy(10,28);
+                    printf("You used your horn at wild lamppost!");
+                    gotoxy(10,29);
+                    printf("Attack was inefficient!");
+                     wait(150);
 
                 }
                 //turn turns the car around
                 else if(action == TURN) {
                     dir = !dir;
                     turn = !turn;
-                    wait(100);
+                    gotoxy(10,28);
+                    printf("You performed a three-point turn-around!");
+                    wait(150);
                 }
                 //flee makes you take dmg and exit combat
                 else if(action == FLEE){
@@ -971,25 +998,40 @@ int main(void)
                     } else {
                         GameOver(&score, &info);
                     }
-                    wait(100);
+                    gotoxy(10,28);
+                    printf("You escaped!");
+                    gotoxy(10,29);
+                    printf("You took %d damage!", 20);
+                    wait(150);
                 }
+
+            gotoxy(10,28);
+            clreol();
+            gotoxy(10,29);
+            clreol();
+
 
             }
             //this is the lamppost turn
             if (turn == 1 && info.isInBattle) {
                 turn = !turn;
-                gotoxy(15,28);
+                gotoxy(10,28);
                 printf("Wild lamppost used 'blind'!"); //it allways uses blind
                 uint8_t dmg = rand() % 20 + score * 2;
-
+                gotoxy(10,29);
+                printf("You took %d damage!", dmg);
                 if (vanFighter.hp > dmg) {
                     vanFighter.hp -= dmg;
                 } else {
                     GameOver(&score, &info);
                 }
-                wait(100);
+                wait(150);
             }
 
+            gotoxy(10,28);
+            clreol();
+            gotoxy(10,29);
+            clreol();
         }
 
         key = '\0';
