@@ -74,7 +74,7 @@ void calcAkse(int16_t pos, int16_t Size, int16_t bSize, int16_t b, int16_t* s, i
             *s = 0;
             *z = bSize - (pos - (Size / 2) - b);
         }
-    }
+
 
     *s = MAX(0, MIN(Size, *s));
     *z = MAX(0, MIN(Size, *z));
@@ -908,8 +908,11 @@ int main(void)
     //game logic loop
     while(1)
     {
+
+
         //dont inverse putty (was a problem at some point)
         inverse(0);
+        bgcolor(0);
 
         //this stores what the next tile you land on will be
         uint8_t encounter = 0;
